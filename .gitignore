@@ -6,3 +6,4 @@
 
 # Ignore public uploads
 /public/uploads/
+\n# Ignore large SQL dump\n/first_okay_db_by_samrat.sql
