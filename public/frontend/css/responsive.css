@@ -1,0 +1,24 @@
+@media (max-width: 575px) {
+    .home-logo {
+        padding: 15px 0;
+    }
+	.electro-navbar-inner{
+		padding: 15px 0;
+	}
+	.button_cp a{
+	    margin-right:0;
+	    margin-bottom:8px;
+	}
+}
+
+@media (max-width: 575.98px) { 
+ 	.home-logo {
+        padding: 15px 0;
+    }
+}
+
+@media (max-width: 768px) { 
+ 	/*.collapse.show {*/
+  /*      display: none;*/
+  /*  }*/
+}

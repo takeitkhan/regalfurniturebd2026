@@ -1,0 +1,18 @@
+@component('mail::message')
+# Welcome to {{ config('app.name') }}! 
+
+Dear Valued Customer, <br>
+
+Thank you for registering with {{ config('app.name') }}.com! <br>
+
+Your account credentials are: <br>
+Email: {{ $email }} <br>
+Password: <b>{{ $password }}</b> <br>
+
+You can now explore and purchase from our wide variety of products and enjoy fast, reliable and effortless online shopping with just a few clicks. <br>
+
+So what are you waiting for, start the best shopping experience now at www.rflus.com! <br>
+
+Thanks,<br>
+{{ config('app.name') }} Team
+@endcomponent

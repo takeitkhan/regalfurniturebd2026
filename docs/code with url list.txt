@@ -1,0 +1,218 @@
+Task 1  tagGallery
+
+url : http://imtiaz-work.asoftwareltd.com/api/category/tag-gallery
+
+code : 
+
+public function tagGallery(Request $request){
+
+        $seo_url =$request->seo_url;
+        $category = $this->term->getByAny('seo_url', $seo_url)->first();
+
+        // dd($category);
+
+        $tag_galleryz = $this->tag_gallery->getByFilter([
+            'category_id' => $category->id
+        ],[
+            'id' =>'asc'
+        ],10);
+
+        $tag_gallery = [];
+        $terms = [];
+
+
+        foreach($tag_galleryz as $tg){
+            $tag_gallery[] =[
+                'url' =>$tg->url,
+                'url_type' =>$tg->url_type,
+                'id' =>$tg->id,
+                'category_id' =>$tg->term->seo_url,
+                'image_url' =>$tg->image->full_size_directory,
+
+            ];
+        }
+
+        $tag_gallery =array_slice($tag_gallery,0,7);
+
+        return response()->json(compact('tag_gallery'));
+
+
+    }
+
+
+Task2 SimilarProductapi 
+
+
+url : http://imtiaz-work.asoftwareltd.com/api/product/similar-products?seo_url=bed-5av26d
+
+
+code:
+
+private $product;
+
+        public function __construct( ProductInterface $product )
+        {
+            $this->product = $product;
+
+        }
+
+
+ public function similarProducts (Request $request )
+        {
+            $seo_url  = $request->seo_url;
+            $product  = $this->product->getByAny('seo_url',$request->seo_url)->first();
+            $similar_products = [];
+
+            if($product){
+                $similar_productz = $this->product->get_product_list_by_search_key($product->title,10);
+
+                foreach($similar_productz as $sm_product){
+
+                    $item = [
+                        'title' => $sm_product->title,
+                        'sub_title' => $sm_product->sub_title,
+                        'first_image' => $sm_product->first_image?$sm_product->first_image->full_size_directory: null,
+                        'second_image' => $sm_product->second_image?$sm_product->second_image->full_size_directory: null,
+                        'seo_url' => $sm_product->seo_url
+                    ];
+                    $similar_products[] = $item;
+                }
+            }
+
+            return response()->json(compact('similar_products'));
+
+        } 
+
+
+
+Task3 simpleinfo 
+
+url :http://imtiaz-work.asoftwareltd.com/api/product/simple-info?seo_url=bed-5av26d
+
+code:
+ 
+public function simpleInfo(Request $request)
+        {
+                $seo_url  = $request->seo_url;
+                $p_info = $this->product->getByAny('seo_url',$request->seo_url)->first();
+                $product = [];
+
+                if($p_info){
+                    $product=[
+                        'title' => $p_info->title,
+                        'sub_title'=> $p_info->sub_title,
+                        'local_selling_price' => $p_info->local_selling_price,
+                        'local_discount' => $p_info->local_discount
+
+                ];
+
+            }
+
+            return response()->json(compact('product'));
+
+        }
+
+
+
+Task4 info 
+
+url: http://imtiaz-work.asoftwareltd.com/api/product/info?seo_url=bed-5av26d
+
+code::
+
+ public function info(Request $request)
+        {
+            $seo_url  = $request->seo_url;
+            $pr_info = $this->product->getByAny('seo_url',$request->seo_url)->first();
+            $product = [];
+
+            if($pr_info){
+                $product=[
+                    'id' => $pr_info->id,
+                    'title' => $pr_info->title,
+                    'sub_title' => $pr_info->sub_title,
+                    'seo_url' => $pr_info->seo_url,
+                    'product_code' => $pr_info->product_code,
+                    'sku' => $pr_info->sku,
+                    'qty' => $pr_info->qty,
+                    'local_selling_price' => $pr_info->local_selling_price,
+                    'local_discount' => $pr_info->local_discount,
+                    'stock_status' => $pr_info->stock_status,
+                    'delivery_area' => $pr_info->delivery_area,
+                    'delivery_charge' => $pr_info->delivery_charge,
+                    'delivery_time' => $pr_info->delivery_time,
+                    'pro_warranty' => $pr_info->pro_warranty,
+                    'short_description' => $pr_info->short_description,
+                    'purchase_note' => $pr_info->purchase_note,
+                    'description' => $pr_info->description,
+                    'tags' => $pr_info->tags,
+                    'seo_keywords' => $pr_info->seo_keywords,
+                    'offer_details' => $pr_info->offer_details,
+                    'offer_start_date' => $pr_info->offer_start_date,
+                    'offer_end_date' => $pr_info->offer_end_date,
+                    'enable_comment' => $pr_info->enable_comment,
+                    'enable_review' => $pr_info->enable_review,
+                    'express_delivery' => $pr_info->express_delivery,
+                    'new_arrival' => $pr_info->new_arrival,
+                    'best_selling' => $pr_info->best_selling,
+                    'flash_sale' => $pr_info->flash_sale,
+                    'flash_time' => $pr_info->flash_time,
+                    'recommended' => $pr_info->recommended,
+                    'disable_buy' => $pr_info->disable_buy,
+                    'order_by_phone' => $pr_info->order_by_phone,
+                    'multiple_pricing' => $pr_info->multiple_pricing,
+                    'emi_available' => $pr_info->emi_available,
+                    'position' => $pr_info->position,
+                    'enable_timespan' => $pr_info->enable_timespan,
+                    'seo_description' => $pr_info->seo_description,
+                    'seo_title' => $pr_info->seo_title,
+                    'seo_h1' => $pr_info->seo_h1,
+                    'seo_h2' => $pr_info->seo_h2,
+                    'parent_id' => $pr_info->parent_id
+                ];
+            }
+
+                    return response()->json(compact('product'));
+
+        }
+
+
+task5 image
+
+url:http://imtiaz-work.asoftwareltd.com/api/product/images?seo_url=bed-5av26d
+
+code:
+
+ public function image(Request $request)
+        {
+            $seo_url = $request->seo_url;
+            $product = $this->product->getByAny('seo_url',$request->seo_url)->first();
+            $images = [];
+
+            if($product)
+            {
+
+                foreach($product->images as $single_image)
+                {
+                    $img = [
+
+                        'full_size_directory' => $single_image->full_size_directory,
+                        'icon_size_directory' => $single_image->icon_size_directory
+
+                    ];
+
+                    $images[] = $img;
+                }
+            }
+
+            return response()->json(compact('images'));
+
+        }
+
+
+
+
+
+
+
+

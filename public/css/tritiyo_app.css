@@ -1,0 +1,64 @@
+.small_btn .btn {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+button.btn-more {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.trumbowyg-editor, .trumbowyg-textarea {
+    background: #f9f9f9;
+}
+
+.trumbowyg-editor ul {
+    margin: 0 !important;
+    padding: 5px 0;
+}
+
+form.delete_form {
+    display: inline;
+}
+
+li.treeview.menu-open > a {
+    color: #00a65a !important;
+}
+
+ul.treeview-menu > li.active > a {
+    color: yellow !important;
+}
+
+h2.cats_title {
+    border-bottom: 1px solid #3c8dbc;
+    width: 100%;
+    padding-bottom: 5px;
+    color: #3c8dbc;
+}
+
+.product_cats {
+    margin-top: 15px;
+    border: 1px solid #EEE;
+    border-right: none;
+    padding: 0px 0px 0px 5px;
+}
+
+.product_cats .pre-scrollable {
+    max-height: 600px;
+}
+
+.pre-scrollable > ul {
+    margin: 0;
+    padding: 0;
+}
+
+.table-responsive {
+    overflow-x: visible;
+}
+
+.product_cats, .post_cats {
+    margin-top: 15px;
+    border: 1px solid #EEE;
+    border-right: none;
+    padding: 0px 0px 0px 5px;
+}

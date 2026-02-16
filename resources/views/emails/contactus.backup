@@ -1,0 +1,18 @@
+@component('mail::layout')
+
+    @slot('header')
+        @component('mail::header', ['url' => config('app.url')])
+            {{ $com_name }}
+        @endcomponent
+    @endslot
+
+    <h5>Message from customer</h5>
+    {{ $description }}
+
+    @slot('footer')
+        @component('mail::footer')
+            {{ date('Y') }} © All Rights Reserved by {{ $com_name }}
+        @endcomponent
+    @endslot
+
+@endcomponent

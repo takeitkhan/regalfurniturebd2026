@@ -1,0 +1,26 @@
+/product/simple-info?seo_url=abcd_url
+
+title, sub_title, local_selling_price, local_discount
+
+
+/product/info?seo_url=abcd_url
+all except 
+user_id, 
+local, 
+dp_price, 
+intl, 
+intl_selling_price, 
+intl_discount,
+barcode, 
+upc, 
+ean,
+isbn, 
+mpn, created_at,
+updated_at,
+is_active,
+lang, 
+is_sticky
+
+
+/product/images?seo_url=abcd_url
+all images.

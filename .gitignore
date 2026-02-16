@@ -1,0 +1,8 @@
+# Ignore dependencies
+/vendor/
+
+# Ignore storage (cache, logs, uploads, etc.)
+/storage/
+
+# Ignore public uploads
+/public/uploads/

@@ -1,0 +1,7 @@
+
+.icon-cancel:before { content: '\e800'; } /* '' */
+.icon-basket:before { content: '\e804'; } /* '' */
+.icon-heart-empty:before { content: '\e805'; } /* '' */
+.icon-cart-plus:before { content: '\f217'; } /* '' */
+.icon-balance-scale:before { content: '\f24e'; } /* '' */
+.icon-user-o:before { content: '\f2c0'; } /* '' */

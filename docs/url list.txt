@@ -1,0 +1,31 @@
+Task 1  tagGallery
+
+                    url : http://imtiaz-work.asoftwareltd.com/api/category/tag-gallery
+
+
+Task2 SimilarProductapi 
+
+                    url : http://imtiaz-work.asoftwareltd.com/api/product/similar-products?seo_url=bed-5av26d
+
+
+Task3 simpleinfo 
+
+                    url :http://imtiaz-work.asoftwareltd.com/api/product/simple-info?seo_url=bed-5av26d
+
+
+Task4 info 
+
+                   url: http://imtiaz-work.asoftwareltd.com/api/product/info?seo_url=bed-5av26d
+              
+
+task5 image
+
+                   url:http://imtiaz-work.asoftwareltd.com/api/product/images?seo_url=bed-5av26d
+
+
+
+
+
+
+
+
