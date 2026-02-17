@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\OrdersMaster;
 use App\Models\Product;
 use App\Repositories\Dashboard\DashboardInterface;
@@ -49,6 +50,11 @@ class DashboardController extends Controller
         $cancelled_orders = $orderStatusCounts['cancel'] ?? 0;
         $refund_orders = $orderStatusCounts['refund'] ?? 0;
 
+        $activity_logs = ActivityLog::with('user')
+            ->orderBy('id', 'desc')
+            ->take(10)
+            ->get();
+
         return view('dashboard', compact(
             'total_product',
             'total_orders',
@@ -59,8 +65,22 @@ class DashboardController extends Controller
             'complete_orders',
             'customer_unreachable_orders',
             'cancelled_orders',
-            'refund_orders'
+            'refund_orders',
+            'activity_logs'
         ));
+    }
+
+    public function activity_logs(Request $request)
+    {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $activity_logs = ActivityLog::with('user')
+            ->orderBy('id', 'desc')
+            ->paginate(50);
+
+        return view('dashboard.activity_logs', compact('activity_logs'));
     }
 
     /**

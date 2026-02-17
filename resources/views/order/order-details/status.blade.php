@@ -19,15 +19,23 @@
                     <select class="form-control" name="move_status">
                         <option value="normal">Normal Message</option>
                         <option value="placed">Placed</option>
-                        <option value="production">Production</option>
-                        <option value="distribution">Distribution</option>
-                        <option value="processing">Processing</option>
-                        <option value="refund">Refund</option>
-                        <option value="done">Done</option>
-                        <option value="cancel">Cancel</option>
-                        <option value="confirmed">Confirmed</option>
+                        <option value="production" disabled>Requested Order</option>
+                        <option value="distribution" disabled>XXX</option>
+                        <option value="processing">Shipped</option>
+                        <option value="refund">Refunded</option>
+                        <option value="done">Complete</option>
+                        <option value="cancel">Cancelled</option>
+                        <option value="confirmed">Need to Shipped</option>
 {{--                        <option value="deleted">Deleted</option>--}}
                         <option value="Customer-Unreachable">Customer Unreachable</option>
+                        <option value="order-hold">Order Hold</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="fake-order">Fake Order</option>
+                        <option value="paid">Paid</option>
+                        <option value="payment-failed">Payment Failed</option>
+                        <option value="need-to-refund">Need to Refund</option>
+                        <option value="partial-paid">Partial Paid</option>
+                        <option value="partial-refunded">Partial Refunded</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -37,6 +45,44 @@
                     <input type="checkbox" name="sending_to_customer"> I want to send message to customer
                 </div>
                 {{ Form::submit('Send Message', ['class' => 'btn btn-success']) }}
+            </form>
+
+            <hr/>
+            <form action="{{ url('order/payment-status') }}" method="post">
+                @csrf
+                <input type="hidden" name="order_id" value="{{ $order_master->id ?? NULL }}"/>
+                <div class="form-group">
+                    <label>Payment Status</label>
+                    <select class="form-control" name="payment_term_status">
+                        <option value="" disabled {{ ($order_master->payment_term_status ?? null) ? '' : 'selected' }}>Select</option>
+                        <option value="Pending" {{ ($order_master->payment_term_status ?? null) == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Successful" {{ ($order_master->payment_term_status ?? null) == 'Successful' ? 'selected' : '' }}>Successful</option>
+                        <option value="Success" {{ ($order_master->payment_term_status ?? null) == 'Success' ? 'selected' : '' }}>Success</option>
+                        <option value="Failed" {{ ($order_master->payment_term_status ?? null) == 'Failed' ? 'selected' : '' }}>Failed</option>
+                        <option value="Partial" {{ ($order_master->payment_term_status ?? null) == 'Partial' ? 'selected' : '' }}>Partial</option>
+                        <option value="COD" {{ ($order_master->payment_term_status ?? null) == 'COD' ? 'selected' : '' }}>COD</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Payment Status</button>
+            </form>
+
+            <hr/>
+            <form action="{{ url('order/payment-method') }}" method="post">
+                @csrf
+                <input type="hidden" name="order_id" value="{{ $order_master->id ?? NULL }}"/>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select class="form-control" name="payment_method">
+                        <option value="">Select</option>
+                        <option value="cash_on_delivery" {{ ($order_master->payment_method ?? null) == 'cash_on_delivery' ? 'selected' : '' }}>Cash On Delivery</option>
+                        <option value="paid_on_hand" {{ ($order_master->payment_method ?? null) == 'paid_on_hand' ? 'selected' : '' }}>Paid on hand directly</option>
+                        <option value="debitcredit" {{ ($order_master->payment_method ?? null) == 'debitcredit' ? 'selected' : '' }} disabled>Debit/Credit</option>
+                        <option value="mobilebanking" {{ ($order_master->payment_method ?? null) == 'mobilebanking' ? 'selected' : '' }} disabled>Mobile Banking Payment</option>
+                        <option value="nagad" {{ ($order_master->payment_method ?? null) == 'nagad' ? 'selected' : '' }} disabled>Nagad Payment</option>
+                        <option value="bkash" {{ ($order_master->payment_method ?? null) == 'bkash' ? 'selected' : '' }} disabled>bKash Payment</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Payment Method</button>
             </form>
 
 

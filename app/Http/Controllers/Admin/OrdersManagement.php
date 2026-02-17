@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use App\Models\Oneclickbuy;
 use App\Models\OrdersDetail;
 use App\Models\OrdersMaster;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use App\Exports\OrdersExport;
 use App\Helpers\OrderMailHelper;
@@ -171,6 +172,7 @@ public function orders(Request $request)
     
     public function move(Request $request)
     {
+        $before = $this->ordersdetail->getById($request->get('id'));
         
         if ($request->get('status') == 'deleted') {
             $attributes = [
@@ -234,6 +236,22 @@ public function orders(Request $request)
         } elseif (auth()->user()->isAdmin()) {
             
             $data = $this->ordersdetail->update($request->get('id'), $attributes);
+        }
+
+        try {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'order_status_update',
+                'entity_type' => 'orders_detail',
+                'entity_id' => $request->get('id'),
+                'old_values' => ['od_status' => $before->od_status ?? null],
+                'new_values' => ['od_status' => $request->get('status')],
+                'note' => $request->get('note'),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl()
+            ]);
+        } catch (\Exception $e) {
+            // Logging failure should not break order flow
         }
         
         // SMS functionality
@@ -308,6 +326,7 @@ public function orders(Request $request)
         
         
         foreach ($os_items as $item) {
+            $before = $this->ordersmaster->getById($item);
             if ($request->order_status == 'deleted') {
                 $attributes = [
                     'order_status' => $request->order_status,
@@ -321,6 +340,22 @@ public function orders(Request $request)
             
             
             $data = $this->ordersmaster->update($item, $attributes);
+
+            try {
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'order_status_update_bulk',
+                    'entity_type' => 'orders_master',
+                    'entity_id' => $item,
+                    'old_values' => ['order_status' => $before->order_status ?? null],
+                    'new_values' => ['order_status' => $request->order_status],
+                    'note' => $request->get('note'),
+                    'ip' => $request->ip(),
+                    'url' => $request->fullUrl()
+                ]);
+            } catch (\Exception $e) {
+                // Logging failure should not break order flow
+            }
             
             /**SMS Functionality**/
             $send_sms_phone_number[] = $data->phone;
@@ -606,6 +641,78 @@ public function orders(Request $request)
             return redirect('orders');
         }
         
+    }
+
+    public function payment_status_update(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|integer',
+            'payment_term_status' => 'nullable|string'
+        ]);
+
+        $order = $this->ordersmaster->getById($request->get('order_id'));
+        $old_status = $order->payment_term_status ?? null;
+
+        $attributes = [
+            'payment_term_status' => $request->get('payment_term_status')
+        ];
+
+        $this->ordersmaster->update($order->id, $attributes);
+
+        try {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'payment_status_update',
+                'entity_type' => 'orders_master',
+                'entity_id' => $order->id,
+                'old_values' => ['payment_term_status' => $old_status],
+                'new_values' => ['payment_term_status' => $request->get('payment_term_status')],
+                'note' => $request->get('note'),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl()
+            ]);
+        } catch (\Exception $e) {
+            // Logging failure should not break update
+        }
+
+        return redirect('orders_single/' . $order->order_random . '?info_type=status')
+            ->with('success', 'Payment status updated');
+    }
+
+    public function payment_method_update(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|integer',
+            'payment_method' => 'nullable|string'
+        ]);
+
+        $order = $this->ordersmaster->getById($request->get('order_id'));
+        $old_method = $order->payment_method ?? null;
+
+        $attributes = [
+            'payment_method' => $request->get('payment_method')
+        ];
+
+        $this->ordersmaster->update($order->id, $attributes);
+
+        try {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'payment_method_update',
+                'entity_type' => 'orders_master',
+                'entity_id' => $order->id,
+                'old_values' => ['payment_method' => $old_method],
+                'new_values' => ['payment_method' => $request->get('payment_method')],
+                'note' => $request->get('note'),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl()
+            ]);
+        } catch (\Exception $e) {
+            // Logging failure should not break update
+        }
+
+        return redirect('orders_single/' . $order->order_random . '?info_type=status')
+            ->with('success', 'Payment method updated');
     }
     
     /* ========================

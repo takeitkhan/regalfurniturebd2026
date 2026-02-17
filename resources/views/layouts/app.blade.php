@@ -21,6 +21,8 @@
 
 @if(auth()->user()->isAdmin())
     @include('layouts.aside_l')
+@elseif(auth()->user()->isManager())
+    @include('layouts.manager_aside')
 @elseif(auth()->user()->isOrderViewer())
     @include('layouts.order_viewer_aside')
 @endif

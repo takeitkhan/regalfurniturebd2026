@@ -75,6 +75,8 @@ class HomeController extends Controller
 
         if (auth()->check() && auth()->user()->isAdmin() && auth()->user()->isAdmin()->id) {
             return redirect('dashboard');
+        } elseif (auth()->check() && auth()->user()->isManager() && auth()->user()->isManager()->id) {
+            return redirect('dashboard');
         } elseif (auth()->check() && auth()->user()->isOrderViewer() && auth()->user()->isOrderViewer()->id) {
             return redirect('orders');
         }

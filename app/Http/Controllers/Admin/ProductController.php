@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App;
 use App\Exports\ProductsExport;
+use App\Models\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Imports\ProductsImport;
 use App\Imports\StockImport;
@@ -543,6 +544,22 @@ class ProductController extends Controller
 
             try {
                 $product = $this->product->update($d->id, $attributes);
+                try {
+                    $old_values = array_intersect_key($d->toArray(), $attributes);
+                    ActivityLog::create([
+                        'user_id' => auth()->id(),
+                        'action' => 'product_update',
+                        'entity_type' => 'product',
+                        'entity_id' => $d->id,
+                        'old_values' => $old_values,
+                        'new_values' => $attributes,
+                        'note' => $request->get('note'),
+                        'ip' => $request->ip(),
+                        'url' => $request->fullUrl()
+                    ]);
+                } catch (\Exception $e) {
+                    // Logging failure should not break product update
+                }
                 // dd($product);
                 Cache::forget('product-simple-info-'.$product->seo_url);
                 Cache::forget('product-product-info-'.$product->seo_url);
@@ -589,6 +606,22 @@ class ProductController extends Controller
 
         try {
             $product = $this->product->update($d->id, $attributes);
+            try {
+                $old_values = array_intersect_key($d->toArray(), $attributes);
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'product_update_other_info',
+                    'entity_type' => 'product',
+                    'entity_id' => $d->id,
+                    'old_values' => $old_values,
+                    'new_values' => $attributes,
+                    'note' => $request->get('note'),
+                    'ip' => $request->ip(),
+                    'url' => $request->fullUrl()
+                ]);
+            } catch (\Exception $e) {
+                // Logging failure should not break product update
+            }
 
             Cache::forget('product-simple-info-'.$product->seo_url);
             Cache::forget('product-product-info-'.$product->seo_url);
@@ -818,6 +851,21 @@ class ProductController extends Controller
 
             try {
                 $product = $this->product->create($attributes);
+                try {
+                    ActivityLog::create([
+                        'user_id' => auth()->id(),
+                        'action' => 'product_create',
+                        'entity_type' => 'product',
+                        'entity_id' => $product->id,
+                        'old_values' => null,
+                        'new_values' => $attributes,
+                        'note' => $request->get('note'),
+                        'ip' => $request->ip(),
+                        'url' => $request->fullUrl()
+                    ]);
+                } catch (\Exception $e) {
+                    // Logging failure should not break product create
+                }
                 Cache::forget('common-top-offers');
 
                 return redirect('edit_product/'.$product->id)->with('success', 'Successfully Added');

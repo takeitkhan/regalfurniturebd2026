@@ -33,6 +33,13 @@
                                 <i class="fa fa-th"></i> <span>Dashboard</span>
                             </a>
                         </li>
+                        @if (Auth::user()->isAdmin())
+                            <li class="{{ Request::is('dashboard/activity-logs') ? 'active' : '' }}">
+                                <a href="{{ url('dashboard/activity-logs') }}">
+                                    <i class="fa fa-list"></i> <span>Activity Logs</span>
+                                </a>
+                            </li>
+                        @endif
                         <li>
                             <a href="{{ url('/most_sold') }}">
                                 <i class="fa fa-th"></i> <span> Most Selling</span>

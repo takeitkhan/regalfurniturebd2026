@@ -26,13 +26,13 @@
                 ['count' => $total_product, 'label' => 'Products', 'desc' => 'Uploaded Products', 'icon' => 'fa-product-hunt', 'color' => 'bg-aqua'],
                 ['count' => $total_orders, 'label' => 'Orders', 'desc' => 'Orders Till Today', 'icon' => 'fa-shopping-cart', 'color' => 'bg-yellow'],
                 ['count' => $placed_orders, 'label' => 'Orders Placed', 'desc' => 'Orders Placed', 'icon' => 'fa-shopping-cart', 'color' => 'bg-green'],
-                ['count' => $processing_orders, 'label' => 'Orders Processing', 'desc' => 'Orders Processing', 'icon' => 'fa-spinner', 'color' => 'bg-primary'],
-                ['count' => $confirmed_orders, 'label' => 'Orders Confirmed', 'desc' => 'Orders Confirmed', 'icon' => 'fa-check-circle', 'color' => 'bg-purple'],
-                ['count' => $production_orders, 'label' => 'In Production', 'desc' => 'Production Orders', 'icon' => 'fa-industry', 'color' => 'bg-orange'],
-                ['count' => $complete_orders, 'label' => 'Orders Completed', 'desc' => 'Completed Orders', 'icon' => 'fa-flag-checkered', 'color' => 'bg-navy'],
+                ['count' => $processing_orders, 'label' => 'Orders Shipped', 'desc' => 'Orders Shipped', 'icon' => 'fa-spinner', 'color' => 'bg-primary'],
+                ['count' => $confirmed_orders, 'label' => 'Need to Shipped', 'desc' => 'Need to Shipped', 'icon' => 'fa-check-circle', 'color' => 'bg-purple'],
+                ['count' => $production_orders, 'label' => 'Requested Order', 'desc' => 'Requested Order', 'icon' => 'fa-industry', 'color' => 'bg-orange'],
+                ['count' => $complete_orders, 'label' => 'Complete Orders', 'desc' => 'Complete Orders', 'icon' => 'fa-flag-checkered', 'color' => 'bg-navy'],
                 ['count' => $customer_unreachable_orders, 'label' => 'Customer Unreachable', 'desc' => 'Customer Unreachable Orders', 'icon' => 'fa-phone-slash', 'color' => 'bg-maroon'],
-                ['count' => $cancelled_orders, 'label' => 'Orders Cancelled', 'desc' => 'Cancelled Orders', 'icon' => 'fa-times-circle', 'color' => 'bg-red'],
-                ['count' => $refund_orders, 'label' => 'Refunded Orders', 'desc' => 'Refund Orders', 'icon' => 'fa-undo', 'color' => 'bg-teal'],
+                ['count' => $cancelled_orders, 'label' => 'Cancelled Orders', 'desc' => 'Cancelled Orders', 'icon' => 'fa-times-circle', 'color' => 'bg-red'],
+                ['count' => $refund_orders, 'label' => 'Refunded Orders', 'desc' => 'Refunded Orders', 'icon' => 'fa-undo', 'color' => 'bg-teal'],
             ];
         @endphp
 
@@ -68,6 +68,7 @@
             </div>
         @endforeach
     </div>
+    @if (Auth::user()->isAdmin())
     <div class="row">
         <div class="col-md-4">
             <div class="box">
@@ -133,6 +134,8 @@
             <!-- /.box -->
         </div>
     </div>
+    @endif
+    @if (Auth::user()->isAdmin())
     <div class="row">
         <div class="col-md-4">
             <div class="box">
@@ -188,6 +191,60 @@
                     <a class="btn btn-app" href="{{ url('medias/all') }}">
                         <i class="fa fa-list-alt"></i> Medias
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Activity Logs</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Old</th>
+                                <th style="width: 240px;">New</th>
+                                <th>Note</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @forelse(($activity_logs ?? []) as $log)
+                                <tr>
+                                    <td>{{ $log->created_at }}</td>
+                                    <td>{{ $log->user->name ?? 'System' }}</td>
+                                    <td>{{ $log->action }}</td>
+                                    <td>{{ $log->entity_type }}{{ $log->entity_id ? ' #' . $log->entity_id : '' }}</td>
+                                    <td>{{ \Illuminate\Support\Str::limit(json_encode($log->old_values), 120) }}</td>
+                                    <td style="width: 240px; max-width: 240px; word-break: break-word;">
+                                        @php $newValues = (array) ($log->new_values ?? []); @endphp
+                                        @if(!empty($newValues))
+                                            @foreach($newValues as $k => $v)
+                                                <div><strong>{{ $k }}:</strong> {{ is_array($v) ? implode(', ', $v) : $v }}</div>
+                                            @endforeach
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>{{ \Illuminate\Support\Str::limit($log->note, 120) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7">No activity logs found.</td>
+                                </tr>
+                            @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\OrdersDetail\OrdersDetailInterface;
 use App\Repositories\OrdersMaster\OrdersMasterInterface;
+use App\Models\ActivityLog;
 
 class MessageController extends Controller
 {
@@ -56,6 +57,25 @@ class MessageController extends Controller
 
             try {
                 $message = $this->message->create($attributes);
+                try {
+                    ActivityLog::create([
+                        'user_id' => auth()->id(),
+                        'action' => 'order_staff_note',
+                        'entity_type' => 'orders_master',
+                        'entity_id' => $request->get('order_id'),
+                        'old_values' => null,
+                        'new_values' => [
+                            'message_type' => $request->get('message_type'),
+                            'status' => $request->get('notes_on'),
+                            'message' => $request->get('message')
+                        ],
+                        'note' => $request->get('message'),
+                        'ip' => $request->ip(),
+                        'url' => $request->fullUrl()
+                    ]);
+                } catch (\Exception $e) {
+                    // Logging failure should not break message save
+                }
                 return redirect('orders_single/' . $request->request_id . '?info_type=staff')->with('success', 'Successfully Added');
 
             } catch (\Illuminate\Database\QueryException $ex) {
@@ -114,6 +134,24 @@ class MessageController extends Controller
             }
 //            dd($attributes);
 
+            if ($request->get('move_status') != 'normal') {
+                try {
+                    ActivityLog::create([
+                        'user_id' => auth()->id(),
+                        'action' => 'order_status_change',
+                        'entity_type' => 'orders_master',
+                        'entity_id' => $request->get('order_id'),
+                        'old_values' => null,
+                        'new_values' => ['order_status' => $request->get('move_status')],
+                        'note' => $request->get('message'),
+                        'ip' => $request->ip(),
+                        'url' => $request->fullUrl()
+                    ]);
+                } catch (\Exception $e) {
+                    // Logging failure should not break message save
+                }
+            }
+
             $widgets = $this->dashboard->getAll();
 
 //            dd($request->get('move_status'));
@@ -146,7 +184,6 @@ class MessageController extends Controller
 
                 $done = $this->point->create($rp_atts);
             }
-
 
 //            if (auth()->user()->isVendor()) {
 //
@@ -227,6 +264,25 @@ class MessageController extends Controller
                     'message' => $msg_for_customer,
                 ]);
                 $message = $this->message->create($attributes);
+                try {
+                    ActivityLog::create([
+                        'user_id' => auth()->id(),
+                        'action' => 'order_customer_message',
+                        'entity_type' => 'orders_master',
+                        'entity_id' => $request->get('order_id'),
+                        'old_values' => null,
+                        'new_values' => [
+                            'move_status' => $request->get('move_status'),
+                            'message_type' => $request->get('message_type'),
+                            'message' => $attributes['message'] ?? null
+                        ],
+                        'note' => $attributes['message'] ?? $request->get('message'),
+                        'ip' => $request->ip(),
+                        'url' => $request->fullUrl()
+                    ]);
+                } catch (\Exception $e) {
+                    // Logging failure should not break message save
+                }
             }
 
             $msg = 'Order status has been changed';

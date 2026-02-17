@@ -176,6 +176,12 @@
                                             Seo Settings
                                         </a>
                                     </li>
+                                    <li class="">
+                                        <a href="{{ url($url . '?p=activity-logs') }}"
+                                           class="{{ (Request::get('p') == 'activity-logs') ? 'tab-active' : null }}">
+                                            Activity Logs
+                                        </a>
+                                    </li>
                                     @if($product->enable_variation == 'on')
                                         <li class="">
                                             <a href="{{ url($url . '?p=product-attribute') }}"
@@ -213,6 +219,8 @@
                                 @includeIf('product.productVariation')
                                 <?php }else if(!empty($product->id) && Request::get('p') == 'seo-settings') { ?>
                                 @includeIf('seo.form', [$post_type = 'product', $post_id = $product->id])
+                                <?php }else if(!empty($product->id) && Request::get('p') == 'activity-logs') { ?>
+                                @includeIf('product.activity_logs')
                                 <?php }else if(!empty($product->id) && Request::get('p') == 'product-attribute') { ?>
                                 @includeIf('product.attributes.product_attributes', [$prouduct = $product])
                                 <?php } else { ?>

@@ -98,6 +98,9 @@ Route::middleware(['outlet'])->group(function () {
     Route::delete('user_delete/{id}', ['as' => 'delete_user', 'uses' => '\App\Http\Controllers\Admin\User\UserController@destroy']);
     // users panel routes close
 
+    Route::post('order/payment-status', ['as' => 'order.payment_status', 'uses' => '\App\Http\Controllers\Admin\OrdersManagement@payment_status_update'])->name('order.payment_status');
+    Route::post('order/payment-method', ['as' => 'order.payment_method', 'uses' => '\App\Http\Controllers\Admin\OrdersManagement@payment_method_update'])->name('order.payment_method');
+
     // posts panel routes
     Route::get('posts', ['as' => 'posts', 'uses' => '\App\Http\Controllers\Admin\PostController@posts'])->name('posts');
     Route::get('add_post', ['as' => 'add_post', 'uses' => '\App\Http\Controllers\Admin\PostController@add_post'])->name('add_post');
@@ -127,6 +130,7 @@ Route::middleware(['outlet'])->group(function () {
 
     // dashboard, menus, widgets
     Route::get('dashboard', ['as' => 'dashboard', 'uses' => '\App\Http\Controllers\Admin\DashboardController@index'])->name('dashboard');
+    Route::get('dashboard/activity-logs', ['as' => 'dashboard.activity_logs', 'uses' => '\App\Http\Controllers\Admin\DashboardController@activity_logs'])->name('dashboard.activity_logs');
     Route::get('menus', ['as' => 'menus', 'uses' => '\App\Http\Controllers\Admin\DashboardController@menus'])->name('menus');
 
     Route::get('widgets', ['as' => 'widgets', 'uses' => '\App\Http\Controllers\Admin\DashboardController@widgets'])->name('widgets');

@@ -17,12 +17,20 @@
                 Notes On:
                 <select class="form-control" name="notes_on">
                     <option value="general">General Note</option>
-                    <option value="production">Note for Production</option>
-                    <option value="distribution">Note for Distribution</option>
-                    <option value="processing">Note for Processing</option>
-                    <option value="refund">Note for Refund</option>
-                    <option value="done">Note for Done</option>
+                    <option value="production">Note for Requested Order</option>
+                    <option value="distribution">Note for XXX</option>
+                    <option value="processing">Note for Shipped</option>
+                    <option value="refund">Note for Refunded</option>
+                    <option value="done">Note for Complete</option>
                     <option value="deleted">Note for Deleted</option>
+                    <option value="order-hold">Note for Order Hold</option>
+                    <option value="delivered">Note for Delivered</option>
+                    <option value="fake-order">Note for Fake Order</option>
+                    <option value="paid">Note for Paid</option>
+                    <option value="payment-failed">Note for Payment Failed</option>
+                    <option value="need-to-refund">Note for Need to Refund</option>
+                    <option value="partial-paid">Note for Partial Paid</option>
+                    <option value="partial-refunded">Note for Partial Refunded</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary btn-sm">

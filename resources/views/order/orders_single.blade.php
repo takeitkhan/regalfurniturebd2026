@@ -45,6 +45,11 @@
                             <i class="fa fa-toggle-{{ (request()->get('info_type') == 'status') ? 'on' : 'off'  }}"
                                aria-hidden="true"></i> Status & Message
                         </a>
+                                <a href="?info_type=activity" type="button"
+                                    class="btn {{ (request()->get('info_type') == 'activity') ? ' btn-success' : ' btn-default'  }} ">
+                                     <i class="fa fa-toggle-{{ (request()->get('info_type') == 'activity') ? 'on' : 'off'  }}"
+                                         aria-hidden="true"></i> Activity Logs
+                                </a>
                     </div>
                 </div>
             </div>
@@ -59,6 +64,8 @@
                 @include('order.order-details.staff')
             @elseif(request()->get('info_type') == 'status')
                 @include('order.order-details.status')
+            @elseif(request()->get('info_type') == 'activity')
+                @include('order.order-details.activity_logs')
             @endif
 
         </div>

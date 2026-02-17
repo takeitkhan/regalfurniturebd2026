@@ -20,7 +20,9 @@ class OutletMiddleware
 
 
         if (auth()->check()) {
-            if((auth()->user()->isAdmin() && auth()->user()->isAdmin()->id) || (auth()->user()->isOrderViewer() && auth()->user()->isOrderViewer()->id)){
+            if((auth()->user()->isAdmin() && auth()->user()->isAdmin()->id)
+                || (auth()->user()->isManager() && auth()->user()->isManager()->id)
+                || (auth()->user()->isOrderViewer() && auth()->user()->isOrderViewer()->id)){
                 return $next($request);
             }else{
                 return redirect('/');

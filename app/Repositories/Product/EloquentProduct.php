@@ -428,6 +428,10 @@ class EloquentProduct implements ProductInterface
         );
 
         $new = array_merge($dufault, $options);
+        $keyword = trim((string) ($new['keyword'] ?? ''));
+        if ($keyword === '') {
+            return $this->model->newCollection();
+        }
         //dd($new);
 
         $result = $this->model
@@ -444,16 +448,16 @@ class EloquentProduct implements ProductInterface
         }
 
 
-        $result = $result->where(function ($query) use ($new) {
-            $subTitle = preg_match('/^[^ ].* .*[^ ]$/', $new['keyword']);
-            $query->orWhere('products.title', 'like', "%{$new["keyword"]}%");
-            $query->orWhere('products.sub_title', 'like', "%{$new["keyword"]}%");
-            $query->orWhere('products.product_code', 'like', "%{$new["keyword"]}%");
-            $query->orWhere('products.sku', 'like', "%{$new["keyword"]}%");
-            $query->orWhere('products.sku', 'like', "%{$new["keyword"]}%");
+        $result = $result->where(function ($query) use ($keyword) {
+            $subTitle = preg_match('/^[^ ].* .*[^ ]$/', $keyword);
+            $query->orWhere('products.title', 'like', "%{$keyword}%");
+            $query->orWhere('products.sub_title', 'like', "%{$keyword}%");
+            $query->orWhere('products.product_code', 'like', "%{$keyword}%");
+            $query->orWhere('products.sku', 'like', "%{$keyword}%");
+            $query->orWhere('products.sku', 'like', "%{$keyword}%");
 
-            $query->orWhere('pv.variation_sub_title', 'like', '%'.$new["keyword"].'%'); // nipun
-            $query->orWhere('pv.variation_product_code', 'like', $new["keyword"]); //nipun
+            $query->orWhere('pv.variation_sub_title', 'like', '%'.$keyword.'%'); // nipun
+            $query->orWhere('pv.variation_product_code', 'like', "%{$keyword}%"); //nipun
 
         });
         $result = $result->select('products.*', 't.id as cat_id', 't.seo_url as t_url', 'pv.variation_sub_title',

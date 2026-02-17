@@ -7,7 +7,7 @@
     </div>
     <strong>
         Copyright © {!! date('Y') !!}
-        <a href="https://activesoftware.biz" target="_blank">ActiveSoftware Ltd</a>.</strong> All rights reserved.
+        <a href="https://mathmozo.com" target="_blank">Mathmozo IT</a>.</strong> All rights reserved.
 </footer>
 
 <div class="modal fade" id="getDataModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
