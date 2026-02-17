@@ -139,11 +139,51 @@ public function orders(Request $request)
         $toDate   = Carbon::parse($request->toDate)->toDateString();
     }
 
+    $hasFilters = collect([
+        $request->column,
+        $request->search_key,
+        $request->search_term,
+        $request->order_id,
+        $request->order_random,
+        $request->customer_name,
+        $request->phone,
+        $request->email,
+        $request->product_code,
+        $request->product_name,
+        $request->order_status,
+        $request->payment_method,
+        $request->payment_term_status,
+        $request->order_from,
+        $request->amount_min,
+        $request->amount_max,
+        $formDate,
+        $toDate,
+    ])->filter(function ($value) {
+        return $value !== null && $value !== '';
+    })->isNotEmpty();
+
+    if ($request->is('search_orders') && !$hasFilters) {
+        return redirect('orders');
+    }
+
     $filters = [
         'column'             => $request->column,
         'search_key'         => $request->search_key,
+        'search_term'        => $request->search_term,
+        'order_id'           => $request->order_id,
+        'order_random'       => $request->order_random,
+        'customer_name'      => $request->customer_name,
+        'phone'              => $request->phone,
+        'email'              => $request->email,
+        'product_code'       => $request->product_code,
+        'product_name'       => $request->product_name,
+        'order_status'       => $request->order_status,
+        'payment_method'     => $request->payment_method,
+        'payment_term_status'=> $request->payment_term_status,
         'formDate'           => $formDate,
         'toDate'             => $toDate,
+        'amount_min'         => $request->amount_min,
+        'amount_max'         => $request->amount_max,
         'pre_booking_order'  => $preBooking,
         'order_from'         => $request->order_from,
     ];

@@ -83,6 +83,7 @@
                             </a>
                         </li>
 
+                        {{--
                         <li class="{{ Request::is('orders/prebooking') ? 'active' : '' }}">
                             <a href="{{ url('orders/prebooking?preBooking=show') }}">
                                 <i class="fa fa-circle-o"></i> Prebooking Orders
@@ -154,6 +155,7 @@
                                 <i class="fa fa-circle-o"></i> Order Deleted
                             </a>
                         </li>
+                        --}}
 
                         <li class="{{ Request::is('orders/temporary') || Request::is('orders/temporary') ? 'active' : '' }}">
                             <a href="{{ url('orders/temporary') }}">

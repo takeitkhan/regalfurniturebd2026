@@ -17,97 +17,109 @@
                 <div class="box-header with-border">
                     <h5 class="box-title">Advanced Search</h5>
                 </div>
-                <div class="box-body">
+                <div class="box-body compact-search">
                     {{ Form::open(array('url' => '/search_orders', 'method' => 'get', 'value' => 'PATCH', 'id' => 'search-form')) }}
-                    <div class="row fixed" style="display:flex;">
-                        <div class="col-xs-2">
-                            <select value="{{ !empty($getattrebute->column) }}" name="column" id="columnName" required
-                                    class="form-control select2" style="width: 100%;">
-                                <option
-                                        value="customer_name" {{ (Request::post('column') == 'customer_name') ? 'selected="selected"' : 'selected="selected"' }}>
-                                    Customer Name
-                                </option>
-                                <option
-                                        value="phone" {{ (Request::post('column') == 'phone') ? 'selected="selected"' : '' }}>
-                                    Phone
-                                </option>
-                                <option
-                                        value="emergency_phone" {{ (Request::post('column') == 'emergency_phone') ? 'selected="selected"' : '' }}>
-                                    Emergency Phone
-                                </option>
-                                <option
-                                        value="address" {{ (Request::post('column') == 'address') ? 'selected="selected"' : '' }}>
-                                    Address
-                                </option>
-                                <option
-                                        value="email" {{ (Request::post('column') == 'email') ? 'selected="selected"' : '' }}>
-                                    Email
-                                </option>
-                                <option
-                                        value="order_status" {{ (Request::post('column') == 'order_status') ? 'selected="selected"' : '' }}>
-                                    Order Status
-                                </option>
-                                <option
-                                        value="payment_method" {{ (Request::post('column') == 'payment_method') ? 'selected="selected"' : '' }}>
-                                    Payment Method
-                                </option>
-                                <option
-                                        value="order_random" {{ (Request::post('column') == 'order_random') ? 'selected="selected"' : '' }}>
-                                    Order Random
-                                </option>
-                                <option
-                                        value="om.id" {{ (Request::post('column') == 'om.id') ? 'selected="selected"' : '' }}>
-                                    Order ID
-                                </option>
-
+                    <div class="row">
+                        <div class="col-md-4 col-sm-8 col-xs-12">
+                            {{ Form::text('search_term', $getAttribute['search_term']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Order ID / Order Random / Customer / Phone / Email / Product Code / Product Name']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <select name="order_status" class="form-control input-sm">
+                                <option value="">Order Status</option>
+                                <option value="placed" {{ ($getAttribute['order_status']??'') == 'placed' ? 'selected' : '' }}>Placed</option>
+                                <option value="production" {{ ($getAttribute['order_status']??'') == 'production' ? 'selected' : '' }}>Requested Order</option>
+                                <option value="distribution" {{ ($getAttribute['order_status']??'') == 'distribution' ? 'selected' : '' }}>XXX</option>
+                                <option value="processing" {{ ($getAttribute['order_status']??'') == 'processing' ? 'selected' : '' }}>Shipped</option>
+                                <option value="refund" {{ ($getAttribute['order_status']??'') == 'refund' ? 'selected' : '' }}>Refunded</option>
+                                <option value="done" {{ ($getAttribute['order_status']??'') == 'done' ? 'selected' : '' }}>Complete</option>
+                                <option value="cancel" {{ ($getAttribute['order_status']??'') == 'cancel' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="confirmed" {{ ($getAttribute['order_status']??'') == 'confirmed' ? 'selected' : '' }}>Need to Shipped</option>
+                                <option value="Customer-Unreachable" {{ ($getAttribute['order_status']??'') == 'Customer-Unreachable' ? 'selected' : '' }}>Customer Unreachable</option>
+                                <option value="order-hold" {{ ($getAttribute['order_status']??'') == 'order-hold' ? 'selected' : '' }}>Order Hold</option>
+                                <option value="delivered" {{ ($getAttribute['order_status']??'') == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                                <option value="fake-order" {{ ($getAttribute['order_status']??'') == 'fake-order' ? 'selected' : '' }}>Fake Order</option>
+                                <option value="paid" {{ ($getAttribute['order_status']??'') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                <option value="payment-failed" {{ ($getAttribute['order_status']??'') == 'payment-failed' ? 'selected' : '' }}>Payment Failed</option>
+                                <option value="need-to-refund" {{ ($getAttribute['order_status']??'') == 'need-to-refund' ? 'selected' : '' }}>Need to Refund</option>
+                                <option value="partial-paid" {{ ($getAttribute['order_status']??'') == 'partial-paid' ? 'selected' : '' }}>Partial Paid</option>
+                                <option value="partial-refunded" {{ ($getAttribute['order_status']??'') == 'partial-refunded' ? 'selected' : '' }}>Partial Refunded</option>
+                                <option value="deleted" {{ ($getAttribute['order_status']??'') == 'deleted' ? 'selected' : '' }}>Deleted</option>
                             </select>
                         </div>
-
-                        <div class="col-xs-3">
-                            {{ Form::text('search_key', $getAttribute['search_key']??'', ['autocomplete' => 'off','id' => "searchKeyword", 'class' => 'form-control', 'placeholder' => 'Search Keys...']) }}
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <select name="payment_method" class="form-control input-sm">
+                                <option value="">Payment Method</option>
+                                <option value="cash_on_delivery" {{ ($getAttribute['payment_method']??'') == 'cash_on_delivery' ? 'selected' : '' }}>Cash On Delivery</option>
+                                <option value="paid_on_hand" {{ ($getAttribute['payment_method']??'') == 'paid_on_hand' ? 'selected' : '' }}>Paid on hand directly</option>
+                                <option value="debitcredit" {{ ($getAttribute['payment_method']??'') == 'debitcredit' ? 'selected' : '' }}>Debit/Credit</option>
+                                <option value="mobilebanking" {{ ($getAttribute['payment_method']??'') == 'mobilebanking' ? 'selected' : '' }}>Mobile Banking</option>
+                                <option value="nagad" {{ ($getAttribute['payment_method']??'') == 'nagad' ? 'selected' : '' }}>Nagad</option>
+                                <option value="bkash" {{ ($getAttribute['payment_method']??'') == 'bkash' ? 'selected' : '' }}>bKash</option>
+                            </select>
                         </div>
-
-                        <div class="input-group date col-xs-2" style="margin-right: 5px;">
-                            <div class="input-group-addon">
-                                From
-                            </div>
-                            <input value="{{ $getAttribute['formDate']??'' }}" autocomplete="off" type="text"
-                                   name="formDate" id="formDate" class="form-control datepicker">
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <select name="payment_term_status" class="form-control input-sm">
+                                <option value="">Payment Status</option>
+                                <option value="Pending" {{ ($getAttribute['payment_term_status']??'') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="Successful" {{ ($getAttribute['payment_term_status']??'') == 'Successful' ? 'selected' : '' }}>Successful</option>
+                                <option value="Success" {{ ($getAttribute['payment_term_status']??'') == 'Success' ? 'selected' : '' }}>Success</option>
+                                <option value="Failed" {{ ($getAttribute['payment_term_status']??'') == 'Failed' ? 'selected' : '' }}>Failed</option>
+                                <option value="Partial" {{ ($getAttribute['payment_term_status']??'') == 'Partial' ? 'selected' : '' }}>Partial</option>
+                                <option value="COD" {{ ($getAttribute['payment_term_status']??'') == 'COD' ? 'selected' : '' }}>COD</option>
+                            </select>
                         </div>
-
-                        <div class="input-group date col-xs-2" style="margin-right: 5px;">
-                            <div class="input-group-addon">
-                                To
-                            </div>
-                            <input value="{{ $getAttribute['toDate']??''  }}" autocomplete="off" type="text"
-                                   name="toDate" id="toDate" class="form-control datepicker">
-                        </div>
-
-                        <div class="input-group date col-xs-2" style="margin-right: 5px;">
-                            <select name="order_from" id="" class="form-control">
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <select name="order_from" class="form-control input-sm">
                                 <option value="">Order Source</option>
                                 @php
                                     $orderFrom = ['website', 'custom', 'one click Buy'];
                                 @endphp
                                 @foreach($orderFrom as $val)
-                                    <option value="{{$val}}" {{isset($getAttribute['order_from'] ) && $getAttribute['order_from'] == $val ? 'selected' : null}}>{{$val}}</option>
+                                    <option value="{{$val}}" {{isset($getAttribute['order_from']) && $getAttribute['order_from'] == $val ? 'selected' : null}}>{{$val}}</option>
                                 @endforeach
                             </select>
                         </div>
-
-                        <div class="col-xs-1">
-                            {{ Form::submit('Search', ['class' => 'btn btn-success']) }}
-                        </div>
-
-                        {{ Form::close() }}
-
-                        <div class="col-xs-1" style="float: right; margin-right: 12px;">
-                            <a class="btn btn-success" id="exportExcel" onclick="getFormData()"
-                               href="javascript:void(0)">Export Excel</a>
-                        </div>
-
                     </div>
 
+                    <div class="row" style="margin-top: 6px;">
+                        <div class="col-md-1 col-sm-3 col-xs-6">
+                            <div class="input-group date">
+                                <div class="input-group-addon">From</div>
+                                <input value="{{ $getAttribute['formDate']??'' }}" autocomplete="off" type="text"
+                                       name="formDate" id="formDate" class="form-control input-sm datepicker">
+                            </div>
+                        </div>
+                        <div class="col-md-1 col-sm-3 col-xs-6">
+                            <div class="input-group date">
+                                <div class="input-group-addon">To</div>
+                                <input value="{{ $getAttribute['toDate']??''  }}" autocomplete="off" type="text"
+                                       name="toDate" id="toDate" class="form-control input-sm datepicker">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::text('amount_min', $getAttribute['amount_min']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Amount Min']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::text('amount_max', $getAttribute['amount_max']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Amount Max']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::submit('Search', ['class' => 'btn btn-success btn-sm btn-block']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <a class="btn btn-default btn-sm btn-block" href="{{ url('orders') }}">Reset</a>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <button type="submit"
+                                    id="exportExcel"
+                                    class="btn btn-info btn-sm btn-block"
+                                    formaction="{{ url('export_orders') }}"
+                                    formmethod="get">
+                                Export Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    {{ Form::close() }}
 
                 </div>
             </div>
@@ -333,47 +345,29 @@
 			})
 		});
 
-		function getFormData() {
-			// let column = jQuery('#columnName').val()
-			// let keyword = jQuery('#searchKeyword').val()
-			// let formDate = jQuery('#formDate').val()
-			// let toDate = jQuery('#toDate').val()
-			// if(formDate === '' && toDate === ''){
-			//     toDate = new Date().toISOString().slice(0, 10)
+        $('#exportExcel').on('click', function () {
+            const form = $('#search-form');
+            form.find('input.export-order-id').remove();
 
-			//     let d = new Date();
-			//     d.setDate(1);
-			//     d.setMonth(d.getMonth() - 1);
-			//     d.setHours(0,0,0,0);
-			//     let lastMonthStart = new Date(d);
-			//     formDate = lastMonthStart.toISOString().slice(0,10)
+            const checked = $('input[name="order_ids[]"]:checked');
+            if (checked.length > 0) {
+                checked.each(function () {
+                    $('<input>', {
+                        type: 'hidden',
+                        name: 'order_ids[]',
+                        value: this.value,
+                        class: 'export-order-id'
+                    }).appendTo(form);
+                });
+            }
 
-			// }
-
-			// if(keyword == ""){
-			//     keyword = null
-			// }
-
-			const formData = jQuery("#search-form").serialize()
-
-			const checked = jQuery('input[name="order_ids[]"]:checked');
-			if (checked.length > 0) {
-				const params = new URLSearchParams();
-
-				checked.each(function () {
-					params.append('order_ids[]', this.value);
-				});
-
-				// Optional: append other parameters like pre_booking_order
-				params.append('pre_booking_order', '0');
-
-				// Update an export link dynamically
-				jQuery('#exportExcel').attr("href", `export_orders?${params.toString()}`);
-			} else {
-				// If no checkboxes are selected, use the formData
-				jQuery('#exportExcel').attr("href", `export_orders?${formData}` + "&pre_booking_order=" + 0);
-			}
-		}
+            $('<input>', {
+                type: 'hidden',
+                name: 'pre_booking_order',
+                value: '0',
+                class: 'export-order-id'
+            }).appendTo(form);
+        });
 
 		//Date picker
 		$('.datepicker').datepicker({
@@ -383,6 +377,18 @@
     <script>
     </script>
     <style type="text/css">
+        .compact-search .row {
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+        .compact-search [class*="col-"] {
+            padding-left: 5px;
+            padding-right: 5px;
+            margin-bottom: 6px;
+        }
+        .compact-search .input-group .input-group-addon {
+            padding: 4px 8px;
+        }
         .search_box .box-title {
             font-size: 15px;
         }
