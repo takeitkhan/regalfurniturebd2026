@@ -261,7 +261,7 @@ public function getAllByUser(array $options = [])
             $data = $data->where('om.pre_booking_order', $new['pre_booking_order']);
         }
 
-        $data = $data->groupBy('om.id')->orderBy('om.id', 'desc');
+        $data = $data->distinct()->orderBy('om.id', 'desc');
 
     /*
     |--------------------------------------------------------------------------
@@ -362,7 +362,7 @@ public function getAllByUser(array $options = [])
             $data = $data->where('om.pre_booking_order', $new['pre_booking_order']);
         }
 
-        $data = $data->groupBy('om.id')->orderBy('om.id', 'desc');
+        $data = $data->distinct()->orderBy('om.id', 'desc');
     }
 
     // 3. Pagination

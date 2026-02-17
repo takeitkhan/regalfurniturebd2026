@@ -237,7 +237,12 @@
                         </tbody>
                     </table>
                     <div class="box-footer clearfix">
-                        {{ $orders->appends($_GET)->links('component.paginator', ['object' => $orders,'more' => 'some']) }}
+                        {{ $orders->appends(\Illuminate\Support\Arr::except($getAttribute ?? [], ['page']))->links('component.paginator', ['object' => $orders,'more' => 'some']) }}
+                        @if(request()->get('debug_pagination') == '1')
+                            <div class="text-muted" style="margin-top:6px; font-size:12px;">
+                                total={{ $orders->total() }}, perPage={{ $orders->perPage() }}, current={{ $orders->currentPage() }}, last={{ $orders->lastPage() }}, count={{ $orders->count() }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

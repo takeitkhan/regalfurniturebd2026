@@ -189,6 +189,7 @@ public function orders(Request $request)
     ];
 
     $orders = $this->ordersmaster->getAllByUser($filters);
+    $orders->withPath(url()->current());
 
     return view('order.orders', [
         'orders' => $orders,
