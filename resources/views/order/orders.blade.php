@@ -120,11 +120,23 @@
                             <div class="form-group">
                                 <select name="order_status" id="ch_order_status" class="form-control">
                                     <option value="">Choose a status</option>
-                                    <option value="production">Production</option>
-                                    <option value="distribution">Distribution</option>
-                                    <option value="processing">Processing</option>
-                                    <option value="refund">Refund</option>
+                                    <option value="placed">Placed</option>
+                                    <option value="production" disabled>Requested Order</option>
+                                    <option value="distribution" disabled>XXX</option>
+                                    <option value="processing">Shipped</option>
+                                    <option value="refund">Refunded</option>
+                                    <option value="done">Complete</option>
+                                    <option value="cancel">Cancelled</option>
+                                    <option value="confirmed">Need to Shipped</option>
+                                    <option value="Customer-Unreachable">Customer Unreachable</option>
+                                    <option value="order-hold">Order Hold</option>
                                     <option value="delivered">Delivered</option>
+                                    <option value="fake-order">Fake Order</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="payment-failed">Payment Failed</option>
+                                    <option value="need-to-refund">Need to Refund</option>
+                                    <option value="partial-paid">Partial Paid</option>
+                                    <option value="partial-refunded">Partial Refunded</option>
                                     <option value="deleted">Delete</option>
                                 </select>
                             </div>
