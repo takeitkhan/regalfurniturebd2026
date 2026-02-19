@@ -167,11 +167,13 @@
                         <tr>
                             <th><input type="checkbox" id="select_all"></th>
                             <th title="Order ID">ID</th>
-                            <th>Status</th>
+                            <th>Order Status</th>
+                            <th>Payment Status</th>
+                            <th>Payment Method</th>
                             <th>Date</th>
                             <th>Customer</th>
                             <th>Phone</th>
-                            <th>Address</th>
+                            <th style="width: 170px;">Address</th>
                             <th>Total</th>
                             <th>Source</th>
                         </tr>
@@ -193,6 +195,29 @@
                                     $total +=  $line->total_amount;
                                 }
                             @endphp
+                            @php
+                                $orderStatusLabels = [
+                                    'placed' => 'Placed',
+                                    'production' => 'Requested Order',
+                                    'distribution' => 'NULL',
+                                    'processing' => 'Shipped',
+                                    'refund' => 'Refunded',
+                                    'done' => 'Complete',
+                                    'cancel' => 'Cancelled',
+                                    'confirmed' => 'Need to Shipped',
+                                    'Customer-Unreachable' => 'Customer Unreachable',
+                                    'order-hold' => 'Order Hold',
+                                    'delivered' => 'Delivered',
+                                    'fake-order' => 'Fake Order',
+                                    'paid' => 'Paid',
+                                    'payment-failed' => 'Payment Failed',
+                                    'need-to-refund' => 'Need to Refund',
+                                    'partial-paid' => 'Partial Paid',
+                                    'partial-refunded' => 'Partial Refunded',
+                                    'deleted' => 'Deleted'
+                                ];
+                                $orderStatusText = $orderStatusLabels[$line->order_status] ?? $line->order_status;
+                            @endphp
                             <tr>
                                 <td>
                                     <input type="checkbox" name="order_ids[]" class="select-row"
@@ -203,15 +228,16 @@
                                         Order # {{ $line->id }}
                                     </a>
                                 </td>
-                                <td style="{{ $line->payment_term_status == 'Successful' ? 'background-color:rgba(194, 255, 238);' : ($line->payment_method == 'cash_on_delivery' ? 'background-color:rgba(242, 238, 203);' : '')}}">
+                                <td>
                                     <label>
-                                        {{--                                        <input type="checkbox"--}}
-                                        {{--                                               class="checkbox"--}}
-                                        {{--                                               name="id[]"--}}
-                                        {{--                                               value="{{ $line->id }}"> --}}
-
-                                        {{$line->order_status}}
+                                        {{ $orderStatusText }}
                                     </label>
+                                </td>
+                                <td style="{{ $line->payment_term_status == 'Successful' ? 'background-color:rgba(194, 255, 238);' : ($line->payment_method == 'cash_on_delivery' ? 'background-color:rgba(242, 238, 203);' : '')}}">
+                                    {{ $line->payment_term_status ?? '-' }}
+                                </td>
+                                <td>
+                                    {{ $line->payment_method ?? '-' }}
                                 </td>
                                 <td>
                                     <b>Order Date: </b>{{ $line->order_date ?? null }} <br>
@@ -229,7 +255,9 @@
                                     {{ $line->customer_name ?? null }}
                                 </td>
                                 <td><a href="tel:{{ $line->email ?? '#' }}">{{ $line->phone ?? null }}</a></td>
-                                <td>{{$line->address}}, {{$line->district}}</td>
+                                <td style="max-width: 180px; width: 170px; white-space: normal; word-break: break-word;">
+                                    {{$line->address}}, {{$line->district}}
+                                </td>
                                 <td>৳{{  number_format($line->grand_total) ?? null }}</td>
                                 <td>{{$line->order_from}}</td>
                             </tr>
