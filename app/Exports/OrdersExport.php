@@ -5,6 +5,8 @@ namespace App\Exports;
 use App\Models\OrdersDetail;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
@@ -50,6 +52,11 @@ class OrdersExport implements FromCollection, WithHeadings
             ])
             ->leftJoin('orders_master as om', 'orders_detail.order_random', '=', 'om.order_random');
 
+        $user = Auth::user();
+        if ($user && $user->isVendor()) {
+            $query->where('orders_detail.vendor_id', $user->id);
+        }
+
         if (!empty($filters['order_ids'])) {
             $orderIds = is_array($filters['order_ids'])
                 ? $filters['order_ids']
@@ -61,19 +68,82 @@ class OrdersExport implements FromCollection, WithHeadings
             return $query->get();
         }
 
-        // Optional: Filter by search key
-        if (!empty($filters['column']) && !empty($filters['search_key'])) {
-            $query->where($filters['column'], 'like', '%'.$filters['search_key'].'%');
+        $hasOrFilters = !empty($filters['search_key']) || !empty($filters['search_term']) || !empty($filters['order_id']) || !empty($filters['order_random'])
+            || !empty($filters['customer_name']) || !empty($filters['phone']) || !empty($filters['email'])
+            || !empty($filters['product_code']) || !empty($filters['product_name']) || !empty($filters['order_status'])
+            || !empty($filters['payment_method']) || !empty($filters['payment_term_status']);
+
+        if ($hasOrFilters) {
+            $query->where(function ($q) use ($filters) {
+                if (!empty($filters['column']) && !empty($filters['search_key'])) {
+                    $q->orWhere($filters['column'], 'like', '%' . $filters['search_key'] . '%');
+                }
+                if (!empty($filters['search_term'])) {
+                    $term = $filters['search_term'];
+                    if (is_numeric($term)) {
+                        $q->orWhere('om.id', $term);
+                    }
+                    $q->orWhere('om.order_random', 'like', '%' . $term . '%')
+                        ->orWhere('om.customer_name', 'like', '%' . $term . '%')
+                        ->orWhere('om.phone', 'like', '%' . $term . '%')
+                        ->orWhere('om.email', 'like', '%' . $term . '%')
+                        ->orWhere('orders_detail.product_code', 'like', '%' . $term . '%')
+                        ->orWhere('orders_detail.product_name', 'like', '%' . $term . '%');
+                }
+                if (!empty($filters['order_id'])) {
+                    $q->orWhere('om.id', $filters['order_id']);
+                }
+                if (!empty($filters['order_random'])) {
+                    $q->orWhere('om.order_random', $filters['order_random']);
+                }
+                if (!empty($filters['customer_name'])) {
+                    $q->orWhere('om.customer_name', 'like', '%' . $filters['customer_name'] . '%');
+                }
+                if (!empty($filters['phone'])) {
+                    $q->orWhere('om.phone', 'like', '%' . $filters['phone'] . '%');
+                }
+                if (!empty($filters['email'])) {
+                    $q->orWhere('om.email', 'like', '%' . $filters['email'] . '%');
+                }
+                if (!empty($filters['product_code'])) {
+                    $q->orWhere('orders_detail.product_code', 'like', '%' . $filters['product_code'] . '%');
+                }
+                if (!empty($filters['product_name'])) {
+                    $q->orWhere('orders_detail.product_name', 'like', '%' . $filters['product_name'] . '%');
+                }
+                if (!empty($filters['order_status'])) {
+                    $q->orWhere('om.order_status', $filters['order_status']);
+                }
+                if (!empty($filters['payment_method'])) {
+                    $q->orWhere('om.payment_method', $filters['payment_method']);
+                }
+                if (!empty($filters['payment_term_status'])) {
+                    $q->orWhere('om.payment_term_status', $filters['payment_term_status']);
+                }
+            });
         }
 
-        // Optional: Filter by date range
         if (!empty($filters['formDate']) && !empty($filters['toDate'])) {
             $from = Carbon::parse($filters['formDate'])->startOfDay();
             $to = Carbon::parse($filters['toDate'])->endOfDay();
-            $query->whereBetween('om.created_at', [$from, $to]);
+            $query->whereBetween('om.order_date', [$from, $to]);
         }
 
-        return $query->get();
+        if (!empty($filters['amount_min']) || !empty($filters['amount_max'])) {
+            $min = $filters['amount_min'] !== null ? $filters['amount_min'] : 0;
+            $max = $filters['amount_max'] !== null ? $filters['amount_max'] : 999999999;
+            $query->whereBetween(DB::raw('CAST(om.total_amount AS DECIMAL(12,2))'), [$min, $max]);
+        }
+
+        if (!empty($filters['order_from'])) {
+            $query->where('om.order_from', $filters['order_from']);
+        }
+
+        if (!empty($filters['pre_booking_order'])) {
+            $query->where('om.pre_booking_order', $filters['pre_booking_order']);
+        }
+
+        return $query->limit(500)->get();
     }
 
     public function headings(): array
