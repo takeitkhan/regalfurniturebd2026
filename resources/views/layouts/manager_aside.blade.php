@@ -2,12 +2,31 @@
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
         <ul class="sidebar-menu" data-widget="tree">
-            <li class="{{ Request::is('dashboard') ? 'active' : '' }}">
-                <a href="{{ url('/dashboard') }}">
-                    <i class="fa fa-th"></i> <span>Dashboard</span>
+            <li class="treeview {{ Request::is('dashboard') || Request::is('most_sold') || Request::is('never_sold') ? 'active menu-open' : '' }}">
+                <a href="">
+                    <i class="fa fa-newspaper-o"></i> <span> Reports Dashboard</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
                 </a>
+                <ul class="treeview-menu">
+                    <li>
+                        <a href="{{ url('/dashboard') }}">
+                            <i class="fa fa-th"></i> <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/most_sold') }}">
+                            <i class="fa fa-th"></i> <span> Most Selling</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/never_sold') }}">
+                            <i class="fa fa-th"></i> <span> Never Sold</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
-
             <li class="treeview {{ Request::is('orders') || Request::is('orders/prebooking') || Request::is('search_orders') || Request::is('orders/placed_cod') || Request::is('orders/placed') || Request::is('orders/production') || Request::is('orders/distribution') || Request::is('orders/processing')
                     || Request::is('orders/done') || Request::is('orders/refund') || Request::is('orders/cod')
                     || Request::is('orders/deleted') ? 'active menu-open' : '' }}">
@@ -36,6 +55,7 @@
                         </a>
                     </li>
 
+                    {{--
                     <li class="{{ Request::is('orders/prebooking') ? 'active' : '' }}">
                         <a href="{{ url('orders/prebooking?preBooking=show') }}">
                             <i class="fa fa-circle-o"></i> Prebooking Orders
@@ -107,6 +127,7 @@
                             <i class="fa fa-circle-o"></i> Order Deleted
                         </a>
                     </li>
+                    --}}
 
                     <li class="{{ Request::is('orders/temporary') || Request::is('orders/temporary') ? 'active' : '' }}">
                         <a href="{{ url('orders/temporary') }}">
@@ -210,25 +231,27 @@
                             <i class="fa fa-angle-right"></i> Disable Buy
                         </a>
                     </li>
-                    @if (Auth::user()->isAdmin())
-                        <li class="{{ Request::is('export_products') || Request::is('export_products') ? 'active' : '' }}">
-                            <a href="{{ url('export_products') }}">
-                                <i class="fa fa-angle-right"></i> Export Products
-                            </a>
-                        </li>
+                </ul>
+            </li>
 
-                        <li class="{{ Request::is('import_products_view') || Request::is('import_products_view') ? 'active' : '' }}">
-                            <a href="{{ url('import_products_view') }}">
-                                <i class="fa fa-angle-right"></i> Import Products
-                            </a>
-                        </li>
-
-                        <li class="{{ Request::routeIs('product.attribute.group') || Request::routeIs('product.attribute.group') ? 'active' : '' }}">
-                            <a href="{{ route('product.attribute.group') }}">
-                                <i class="fa fa-angle-right"></i> Attributes (new)
-                            </a>
-                        </li>
-                    @endif
+            <li class="treeview {{ Request::is('users') || Request::is('add_user') ? 'active menu-open' : '' }}">
+                <a href="">
+                    <i class="fa fa-users"></i> <span>Contacts Management</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="{{ Request::is('users') || Request::is('users') ? 'active' : '' }}">
+                        <a href="{{ url('users') }}">
+                            <i class="fa fa-users"></i> Users
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('add_user') || Request::is('add_user') ? 'active' : '' }}">
+                        <a href="{{ url('add_user') }}">
+                            <i class="fa fa-user-plus"></i> Add user
+                        </a>
+                    </li>
                 </ul>
             </li>
         </ul>

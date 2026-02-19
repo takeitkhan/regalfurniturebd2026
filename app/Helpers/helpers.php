@@ -169,6 +169,51 @@ if (!function_exists('category_sticky_menu_on_home_page')) {
     }
 }
 
+if (!function_exists('is_blocked_ip')) {
+    function is_blocked_ip($ip): bool
+    {
+        if (!$ip) {
+            return false;
+        }
+
+        $blocked = config('security.blocked_ips', []);
+
+        return in_array($ip, $blocked, true);
+    }
+}
+
+if (!function_exists('is_disposable_email')) {
+    function is_disposable_email($email): bool
+    {
+        if (!$email || strpos($email, '@') === false) {
+            return false;
+        }
+
+        $domain = strtolower(trim(substr($email, strrpos($email, '@') + 1)));
+        if ($domain === '') {
+            return false;
+        }
+
+        $blockedDomains = config('security.disposable_email_domains', []);
+
+        $listFile = storage_path('app/disposable_email_domains.txt');
+        if (file_exists($listFile)) {
+            $lines = array_filter(array_map('trim', file($listFile)));
+            $blockedDomains = array_merge($blockedDomains, $lines);
+        }
+
+        $blockedDomains = array_unique(array_filter(array_map('strtolower', $blockedDomains)));
+
+        foreach ($blockedDomains as $blocked) {
+            if ($domain === $blocked || substr($domain, -strlen('.' . $blocked)) === '.' . $blocked) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('select_option_html')) {
     /**
      * @param $category See $cats variable by printing on banks.blade.php

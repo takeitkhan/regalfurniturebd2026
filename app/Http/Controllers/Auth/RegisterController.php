@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
+use App\Models\UserRegisterLog;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 
 class RegisterController extends Controller
 {
@@ -51,9 +53,93 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                function ($attribute, $value, $fail) {
+                    if (is_blocked_ip(request()->ip())) {
+                        $fail('Registration is blocked from this IP.');
+                    }
+                    if (is_disposable_email($value)) {
+                        $fail('Disposable email addresses are not allowed.');
+                    }
+                }
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+    }
+
+    public function register(Request $request)
+    {
+        if (is_blocked_ip($request->ip())) {
+            try {
+                UserRegisterLog::create([
+                    'user_id' => null,
+                    'name' => $request->get('name'),
+                    'email' => $request->get('email'),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'source' => 'web_auth',
+                    'status' => 'blocked',
+                    'reason' => 'ip_blocked',
+                    'payload' => $request->except(['password', 'password_confirmation'])
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
+
+            return redirect()->back()->withErrors(['email' => 'Registration is blocked from this IP.'])->withInput();
+        }
+
+        $validator = $this->validator($request->all());
+
+        if ($validator->fails()) {
+            try {
+                UserRegisterLog::create([
+                    'user_id' => null,
+                    'name' => $request->get('name'),
+                    'email' => $request->get('email'),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'source' => 'web_auth',
+                    'status' => 'failed',
+                    'reason' => $validator->errors()->first(),
+                    'payload' => $request->except(['password', 'password_confirmation'])
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
+
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $this->validator($request->all())->validate();
+
+        $user = $this->create($request->all());
+
+        try {
+            UserRegisterLog::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->header('User-Agent'),
+                'source' => 'web_auth',
+                'status' => 'success',
+                'reason' => null,
+                'payload' => $request->except(['password', 'password_confirmation'])
+            ]);
+        } catch (\Exception $e) {
+            // ignore logging failures
+        }
+
+        $this->guard()->login($user);
+
+        return $this->registered($request, $user)
+            ?: redirect($this->redirectPath());
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\OtpGenerate;
+use App\Models\UserRegisterLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -109,9 +110,42 @@ class AuthController extends Controller
 
         // return response()->json($request->all());
 
+        if (is_blocked_ip($request->ip())) {
+            try {
+                UserRegisterLog::create([
+                    'user_id' => null,
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'source' => 'api',
+                    'status' => 'blocked',
+                    'reason' => 'ip_blocked',
+                    'payload' => $request->except(['password', 'password_confirmation'])
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
+
+            return response()->json([
+                'type' => 'blocked',
+                'messages' => 'Registration is blocked from this IP.',
+                'result' => null
+            ], 403);
+        }
+
         $validate = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email|unique:users',
+            'email' => [
+                'required',
+                'email',
+                'unique:users',
+                function ($attribute, $value, $fail) {
+                    if (is_disposable_email($value)) {
+                        $fail('Disposable email addresses are not allowed.');
+                    }
+                }
+            ],
             'telephone' => 'required',
             'emergency_contact_number' => 'required',
             'password' => 'required|string|min:6|max:32|confirmed',
@@ -128,6 +162,22 @@ class AuthController extends Controller
         ]);
 
         if ($validate->fails()) {
+            try {
+                UserRegisterLog::create([
+                    'user_id' => null,
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'source' => 'api',
+                    'status' => 'failed',
+                    'reason' => $validate->errors()->first(),
+                    'payload' => $request->except(['password', 'password_confirmation'])
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
+
             return response()->json([
                 'type' => "missing",
                 'messages' => $validate->errors(),
@@ -154,6 +204,22 @@ class AuthController extends Controller
 
         $user = User::create($userAttr);
         $token = $user->createToken($request->device_name)->plainTextToken;
+
+        try {
+            UserRegisterLog::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->header('User-Agent'),
+                'source' => 'api',
+                'status' => 'success',
+                'reason' => null,
+                'payload' => $request->except(['password', 'password_confirmation'])
+            ]);
+        } catch (\Exception $e) {
+            // ignore logging failures
+        }
 
         return response()->json([
             'type' => $user ? "success" : "fail",

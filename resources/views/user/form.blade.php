@@ -56,7 +56,7 @@
                 @slot('fields')
                     <div class="form-group">
                         {{ Form::label('employee_no', 'Employee No', array('class' => 'employee_no')) }}
-                        {{ Form::text('employee_no', (!empty($user->employee_no) ? $user->employee_no : NULL), ['required', 'class' => 'form-control', 'placeholder' => 'Enter employee no...']) }}
+                        {{ Form::text('employee_no', (!empty($user->employee_no) ? $user->employee_no : NULL), ['class' => 'form-control', 'placeholder' => 'Enter employee no...']) }}
                     </div>
 
                     <div class="form-group">
@@ -65,17 +65,17 @@
                     </div>
                     <div class="form-group">
                         {{ Form::label('email', 'Email', array('class' => 'email')) }}
-                        {{ Form::text('email', (!empty($user->email) ? $user->email : NULL), ['required',  'type' => 'email', 'required', 'class' => 'form-control', 'placeholder' => 'Enter email...']) }}
+                        {{ Form::text('email', (!empty($user->email) ? $user->email : NULL), ['required', 'type' => 'email', 'class' => 'form-control', 'placeholder' => 'Enter email...']) }}
                     </div>
 
                     <div class="form-group">
                         {{ Form::label('username', 'Username', array('class' => 'username')) }}
-                        {{ Form::text('username', (!empty($user->username) ? $user->username : NULL), ['required', 'class' => 'form-control', 'placeholder' => 'Enter username...']) }}
+                        {{ Form::text('username', (!empty($user->username) ? $user->username : NULL), ['class' => 'form-control', 'placeholder' => 'Enter username...']) }}
                     </div>
 
                     <div class="form-group">
                         {{ Form::label('birthday', 'Birthday', array('class' => 'birthday')) }}
-                        {{ Form::text('birthday', (!empty($user->birthday) ? $user->birthday : NULL), ['id' => 'date', 'required', 'class' => 'form-control', 'placeholder' => 'Enter birthday...']) }}
+                        {{ Form::text('birthday', (!empty($user->birthday) ? $user->birthday : NULL), ['class' => 'form-control datepicker', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
                     </div>
 
                     <div class="form-group">
@@ -90,7 +90,7 @@
 
                     <div class="form-group">
                         {{ Form::label('join_date', 'Joining Date', array('class' => 'join_date')) }}
-                        {{ Form::text('join_date', (!empty($user->join_date) ? $user->join_date : NULL), ['id' => 'date1', 'class' => 'form-control', 'placeholder' => 'Enter joining date...']) }}
+                        {{ Form::text('join_date', (!empty($user->join_date) ? $user->join_date : NULL), ['class' => 'form-control datepicker', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
                     </div>
 
                     <div class="form-group">
@@ -110,7 +110,7 @@
 
                     <div class="form-group">
                         {{ Form::label('emergency_phone', 'Emergency Phone', array('class' => 'emergency_phone')) }}
-                        {{ Form::text('emergency_phone', (!empty($user->emergency_phone) ? $user->emergency_phone : NULL), ['required', 'class' => 'form-control', 'placeholder' => 'Enter emergency phone...']) }}
+                        {{ Form::text('emergency_phone', (!empty($user->emergency_phone) ? $user->emergency_phone : NULL), ['class' => 'form-control', 'placeholder' => 'Enter emergency phone...']) }}
                     </div>
 
                     <div class="form-group">
@@ -125,8 +125,13 @@
 
 
                     <div class="form-group">
+                        @php
+                            $allowedRoleIds = [1, 2, 4, 7, 8];
+                        @endphp
                         @foreach($roles as $key => $val)
-                            <?php $roless[$val->id] = $val->description ?>
+                            @if(in_array($val->id, $allowedRoleIds, true))
+                                <?php $roless[$val->id] = $val->description ?>
+                            @endif
                         @endforeach
                         <?php
                         if (!empty($user)) {
@@ -134,17 +139,31 @@
                         }
                         ?>
                         {{ Form::label('user_role', 'User Role', array('class' => 'user_role')) }}
-                        {{ Form::select('user_role', $roless, (!empty($role_id->role_id) ? $role_id->role_id : NULL), ['class' => 'form-control']) }}
+                        {{ Form::select('user_role', $roless, (!empty($role_id->role_id) ? $role_id->role_id : NULL), ['class' => 'form-control', 'required']) }}
                         {{ Form::hidden('id_of_role_user', (!empty($role_id->id) ? $role_id->id : NULL), []) }}
                     </div>
-                    @if (empty($user->id))
-                        <div class="form-group">
-                            {{ Form::label('password', 'Password', array('class' => 'password')) }}
-                            {{ Form::text('password', NULL, ['type' => 'password', 'class' => 'form-control', 'placeholder' => 'Enter new password...']) }}
-                        </div>
-                    @endif
+                    <div class="form-group">
+                        {{ Form::label('password', 'Password', array('class' => 'password')) }}
+                        {{ Form::password('password', ['class' => 'form-control', 'placeholder' => (!empty($user->id) ? 'Leave blank to keep current password' : 'Enter new password...'), 'required' => empty($user->id)]) }}
+                    </div>
+                    <div class="form-group">
+                        {{ Form::label('password_confirmation', 'Confirm Password', array('class' => 'password_confirmation')) }}
+                        {{ Form::password('password_confirmation', ['class' => 'form-control', 'placeholder' => (!empty($user->id) ? 'Repeat new password' : 'Confirm password'), 'required' => empty($user->id)]) }}
+                    </div>
                 @endslot
             @endcomponent
         </div>
     </div>
+@endsection
+
+@section('cusjs')
+    <script>
+        if (window.jQuery && jQuery.fn.datepicker) {
+            jQuery('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
+            });
+        }
+    </script>
 @endsection

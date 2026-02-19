@@ -705,9 +705,38 @@ class CommonController extends Controller
     public function web_signup(Request $request)
     {
         //dd($request);
-        request()->validate([
+        if (is_blocked_ip($request->ip())) {
+            try {
+                \App\Models\UserRegisterLog::create([
+                    'user_id' => null,
+                    'name' => $request->get('name'),
+                    'email' => $request->get('email'),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'source' => 'web_signup',
+                    'status' => 'blocked',
+                    'reason' => 'ip_blocked',
+                    'payload' => $request->except(['password', 'password_confirmation'])
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
+
+            return redirect()->back()->withErrors(['email' => 'Registration is blocked from this IP.'])->withInput();
+        }
+
+        $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email|unique:users',
+            'email' => [
+                'required',
+                'email',
+                'unique:users',
+                function ($attribute, $value, $fail) {
+                    if (is_disposable_email($value)) {
+                        $fail('Disposable email addresses are not allowed.');
+                    }
+                }
+            ],
             'telephone' => 'required',
             'emergency_contact_number' => 'required',
             'password' => 'required|string|min:6|max:32|confirmed',
@@ -719,6 +748,26 @@ class CommonController extends Controller
                 }
             }],
         ]);
+
+        if ($validator->fails()) {
+            try {
+                \App\Models\UserRegisterLog::create([
+                    'user_id' => null,
+                    'name' => $request->get('name'),
+                    'email' => $request->get('email'),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'source' => 'web_signup',
+                    'status' => 'failed',
+                    'reason' => $validator->errors()->first(),
+                    'payload' => $request->except(['password', 'password_confirmation'])
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
+
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         $user = [
             'name' => $request->get('name'),
@@ -735,6 +784,22 @@ class CommonController extends Controller
         ];
 
         $newuser = User::create($user);
+
+        try {
+            \App\Models\UserRegisterLog::create([
+                'user_id' => $newuser->id,
+                'name' => $newuser->name,
+                'email' => $newuser->email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->header('User-Agent'),
+                'source' => 'web_signup',
+                'status' => 'success',
+                'reason' => null,
+                'payload' => $request->except(['password', 'password_confirmation'])
+            ]);
+        } catch (\Exception $e) {
+            // ignore logging failures
+        }
 
         $data = [
             'email' => $request->get('email'),

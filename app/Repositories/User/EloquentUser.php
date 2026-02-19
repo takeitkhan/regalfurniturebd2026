@@ -44,12 +44,12 @@ class EloquentUser implements UserInterface
                 //->where($new['column'], $new['search_key'])
                 ->whereRaw('' . $new['column'] . ' like "%' . $new['search_key'] . '%"')
                 ->orderBy('id', 'desc')
-                ->paginate(10);
+                ->paginate(25);
         } else {
             return $this->model
                 ->whereRaw($os)
                 ->orderBy('id', 'desc')
-                ->paginate(10);
+                ->paginate(25);
         }
     }
 
