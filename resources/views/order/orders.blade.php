@@ -28,7 +28,7 @@
                                 <option value="">Order Status</option>
                                 <option value="placed" {{ ($getAttribute['order_status']??'') == 'placed' ? 'selected' : '' }}>Placed</option>
                                 <option value="production" {{ ($getAttribute['order_status']??'') == 'production' ? 'selected' : '' }}>Requested Order</option>
-                                <option value="distribution" {{ ($getAttribute['order_status']??'') == 'distribution' ? 'selected' : '' }}>XXX</option>
+                                <option value="distribution" {{ ($getAttribute['order_status']??'') == 'distribution' ? 'selected' : '' }}>NULL</option>
                                 <option value="processing" {{ ($getAttribute['order_status']??'') == 'processing' ? 'selected' : '' }}>Shipped</option>
                                 <option value="refund" {{ ($getAttribute['order_status']??'') == 'refund' ? 'selected' : '' }}>Refunded</option>
                                 <option value="done" {{ ($getAttribute['order_status']??'') == 'done' ? 'selected' : '' }}>Complete</option>
@@ -50,7 +50,7 @@
                             <select name="payment_method" class="form-control input-sm">
                                 <option value="">Payment Method</option>
                                 <option value="cash_on_delivery" {{ ($getAttribute['payment_method']??'') == 'cash_on_delivery' ? 'selected' : '' }}>Cash On Delivery</option>
-                                <option value="paid_on_hand" {{ ($getAttribute['payment_method']??'') == 'paid_on_hand' ? 'selected' : '' }}>Paid on hand directly</option>
+                                <option value="paid_on_hand" {{ ($getAttribute['payment_method']??'') == 'paid_on_hand' ? 'selected' : '' }}>Cash on Hand</option>
                                 <option value="debitcredit" {{ ($getAttribute['payment_method']??'') == 'debitcredit' ? 'selected' : '' }}>Debit/Credit</option>
                                 <option value="mobilebanking" {{ ($getAttribute['payment_method']??'') == 'mobilebanking' ? 'selected' : '' }}>Mobile Banking</option>
                                 <option value="nagad" {{ ($getAttribute['payment_method']??'') == 'nagad' ? 'selected' : '' }}>Nagad</option>
@@ -133,8 +133,8 @@
                                 <select name="order_status" id="ch_order_status" class="form-control">
                                     <option value="">Choose a status</option>
                                     <option value="placed">Placed</option>
-                                    <option value="production" disabled>Requested Order</option>
-                                    <option value="distribution" disabled>XXX</option>
+                                    <option value="production">Requested Order</option>
+                                    <option value="distribution" disabled>NULL</option>
                                     <option value="processing">Shipped</option>
                                     <option value="refund">Refunded</option>
                                     <option value="done">Complete</option>

@@ -19,8 +19,8 @@
                     <select class="form-control" name="move_status">
                         <option value="normal">Normal Message</option>
                         <option value="placed">Placed</option>
-                        <option value="production" disabled>Requested Order</option>
-                        <option value="distribution" disabled>XXX</option>
+                        <option value="production">Requested Order</option>
+                        <option value="distribution" disabled>NULL</option>
                         <option value="processing">Shipped</option>
                         <option value="refund">Refunded</option>
                         <option value="done">Complete</option>
@@ -75,7 +75,7 @@
                     <select class="form-control" name="payment_method">
                         <option value="">Select</option>
                         <option value="cash_on_delivery" {{ ($order_master->payment_method ?? null) == 'cash_on_delivery' ? 'selected' : '' }}>Cash On Delivery</option>
-                        <option value="paid_on_hand" {{ ($order_master->payment_method ?? null) == 'paid_on_hand' ? 'selected' : '' }}>Paid on hand directly</option>
+                        <option value="paid_on_hand" {{ ($order_master->payment_method ?? null) == 'paid_on_hand' ? 'selected' : '' }}>Cash on Hand</option>
                         <option value="debitcredit" {{ ($order_master->payment_method ?? null) == 'debitcredit' ? 'selected' : '' }} disabled>Debit/Credit</option>
                         <option value="mobilebanking" {{ ($order_master->payment_method ?? null) == 'mobilebanking' ? 'selected' : '' }} disabled>Mobile Banking Payment</option>
                         <option value="nagad" {{ ($order_master->payment_method ?? null) == 'nagad' ? 'selected' : '' }} disabled>Nagad Payment</option>

@@ -18,7 +18,7 @@
                 <select class="form-control" name="notes_on">
                     <option value="general">General Note</option>
                     <option value="production">Note for Requested Order</option>
-                    <option value="distribution">Note for XXX</option>
+                    <option value="distribution">Note for NULL</option>
                     <option value="processing">Note for Shipped</option>
                     <option value="refund">Note for Refunded</option>
                     <option value="done">Note for Complete</option>
