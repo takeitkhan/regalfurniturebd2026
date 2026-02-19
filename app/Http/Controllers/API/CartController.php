@@ -798,6 +798,7 @@ class CartController extends Controller
                 'emergency_mobile' => 'required|min:11|max:11|different:mobile',
                 'email' => 'required',
                 'address' => 'required',
+                'birthday' => 'nullable|date|before:2010-01-01',
             ]
         );
 
@@ -868,6 +869,7 @@ class CartController extends Controller
                     'address' => $request->address,
                     'username' => $username,
                     'password' => bcrypt($request->password),
+                    'birthday' => $request->filled('birthday') ? Carbon::parse($request->birthday)->toDateString() : null,
                     'is_active' => 1
                 ];
             } else {
@@ -884,6 +886,7 @@ class CartController extends Controller
                     'address' => $request->address,
                     'username' => $username,
                     'password' => bcrypt('12345678'),
+                    'birthday' => $request->filled('birthday') ? Carbon::parse($request->birthday)->toDateString() : null,
                     'is_active' => 1
                 ];
 

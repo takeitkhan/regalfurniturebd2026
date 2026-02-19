@@ -713,6 +713,11 @@ class CommonController extends Controller
             'password' => 'required|string|min:6|max:32|confirmed',
             'agree' => 'required',
             'district' => 'required',
+            'company' => ['nullable', function ($attribute, $value, $fail) {
+                if ($value !== null && strtolower(trim($value)) === 'dhaka') {
+                    $fail('The company is invalid.');
+                }
+            }],
         ]);
 
         $user = [

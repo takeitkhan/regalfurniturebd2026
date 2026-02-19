@@ -118,7 +118,13 @@ class AuthController extends Controller
             'agree' => 'required',
             'district' => 'required',
             'device_name' => 'required',
-            'agree' => 'accepted'
+            'agree' => 'accepted',
+            'birthday' => 'nullable|date|before:2010-01-01',
+            'company' => ['nullable', function ($attribute, $value, $fail) {
+                if ($value !== null && strtolower(trim($value)) === 'dhaka') {
+                    $fail('The company is invalid.');
+                }
+            }]
         ]);
 
         if ($validate->fails()) {
@@ -140,6 +146,7 @@ class AuthController extends Controller
             'district' => $request->district,
             'post_code' => $request->post_code,
             'password' => Hash::make($request->password),
+            'birthday' => $request->filled('birthday') ? Carbon::parse($request->birthday)->toDateString() : null,
             'is_active' => true
         ];
 
