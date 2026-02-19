@@ -21,6 +21,7 @@ use App\Repositories\Temporaryorder\TemporaryorderInterface;
 use App\Repositories\Term\TermInterface;
 use App\Repositories\User\UserInterface;
 use App\Wishlist;
+use App\Models\ActivityLog;
 use DOMDocument;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
@@ -1507,7 +1508,24 @@ class ShopController extends Controller
                              * Here you can also sent sms or email for successfull transaction to customer
                              */
 
+                            $old_status = $orders_master->payment_term_status ?? null;
                             $orders_master = $this->ordersmaster->update($request->value_a, ['payment_term_status' => 'Successful', 'trans_id' => $tran_id]);
+
+                            try {
+                                ActivityLog::create([
+                                    'user_id' => $orders_master->user_id ?? null,
+                                    'action' => 'payment_status_update_gateway',
+                                    'entity_type' => 'orders_master',
+                                    'entity_id' => $orders_master->id ?? $request->value_a,
+                                    'old_values' => ['payment_term_status' => $old_status],
+                                    'new_values' => ['payment_term_status' => 'Successful'],
+                                    'note' => 'SSLCommerz validation update',
+                                    'ip' => $request->ip(),
+                                    'url' => $request->fullUrl()
+                                ]);
+                            } catch (\Exception $e) {
+                                // Logging failure should not break payment flow
+                            }
 
                             if (!empty($orders_master)) {
                                 /*m = adminSMSConfig($this->paymentsetting->getById(1));
@@ -1527,7 +1545,24 @@ class ShopController extends Controller
                              * That means IPN did not work or IPN URL was not set in your merchant panel and Transation validation failed.
                              * Here you need to update order status as Failed in order table.
                              */
+                            $old_status = $orders_master->payment_term_status ?? null;
                             $orders_master = $this->ordersmaster->update($request->value_a, ['payment_term_status' => 'Failed', 'trans_id' => $tran_id]);
+
+                            try {
+                                ActivityLog::create([
+                                    'user_id' => $orders_master->user_id ?? null,
+                                    'action' => 'payment_status_update_gateway',
+                                    'entity_type' => 'orders_master',
+                                    'entity_id' => $orders_master->id ?? $request->value_a,
+                                    'old_values' => ['payment_term_status' => $old_status],
+                                    'new_values' => ['payment_term_status' => 'Failed'],
+                                    'note' => 'SSLCommerz validation failed',
+                                    'ip' => $request->ip(),
+                                    'url' => $request->fullUrl()
+                                ]);
+                            } catch (\Exception $e) {
+                                // Logging failure should not break payment flow
+                            }
                             $msg = 'Validation Fail';
                         }
                     } elseif ($orders_master->payment_term_status == 'Processing' || $orders_master->payment_term_status == 'Complete') {

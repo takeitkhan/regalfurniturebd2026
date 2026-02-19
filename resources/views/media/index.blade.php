@@ -41,8 +41,12 @@
                         @foreach($medias as $media)
                             <tr>
                                 <td>
-                                    <img class="img-responsive" style="max-width: 150px; max-height: 150px;"
-                                         src="{{ url($media->icon_size_directory) }}"/>
+                                    @if(strtolower($media->file_extension) === 'pdf')
+                                        <i class="fa fa-file-pdf-o" style="font-size: 36px; color: #d9534f;"></i>
+                                    @else
+                                        <img class="img-responsive" style="max-width: 150px; max-height: 150px;"
+                                             src="{{ url($media->icon_size_directory) }}"/>
+                                    @endif
                                 </td>
                                 <td>{{ $media->id }}</td>
                                 <td>

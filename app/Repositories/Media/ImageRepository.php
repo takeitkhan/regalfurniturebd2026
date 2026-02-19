@@ -26,23 +26,42 @@ class ImageRepository
      */
     public function upload($form_data)
     {
+        $result = $this->storeFile($form_data);
 
+        if ($result['error']) {
+            return Response::json([
+                'error' => true,
+                'message' => $result['message'],
+                'code' => $result['code']
+            ], $result['code']);
+        }
+
+        return Response::json([
+            'error' => false,
+            'code' => 200,
+            'image_id' => $result['image']->id
+        ], 200);
+    }
+
+    /**
+     * @param $form_data
+     * @return array
+     */
+    public function storeFile($form_data)
+    {
         $photo = $form_data['file'];
-        $extension = $photo->getClientOriginalExtension();
+        $extension = strtolower($photo->getClientOriginalExtension());
 
-        $validXtra = $extension == 'glb' || $extension == 'gitf';
+        $validXtra = $extension === 'glb' || $extension === 'gitf';
         $validator = Validator::make($form_data, Image::$rules, Image::$messages);
 
         if (!$validXtra && $validator->fails()) {
-
-            return Response::json([
+            return [
                 'error' => true,
                 'message' => $validator->messages()->first(),
                 'code' => 400
-            ], 400);
-
+            ];
         }
-
 
         $originalName = $photo->getClientOriginalName();
         $originalNameWithoutExt = substr($originalName, 0, strlen($originalName) - strlen($extension) - 1);
@@ -51,14 +70,15 @@ class ImageRepository
         $allowed_filename = $this->createUniqueFilename($filename, $extension);
 
         $uploadSuccess1 = $this->original($photo, $allowed_filename);
-        $uploadSuccess2 = $validXtra ? true : $this->icon($photo, $allowed_filename);
+        $shouldGenerateIcon = !in_array($extension, ['glb', 'gitf', 'pdf'], true);
+        $uploadSuccess2 = $shouldGenerateIcon ? $this->icon($photo, $allowed_filename) : true;
 
         if (!$uploadSuccess1 || !$uploadSuccess2) {
-            return Response::json([
+            return [
                 'error' => true,
                 'message' => 'Server error while uploading',
                 'code' => 500
-            ], 500);
+            ];
         }
 
         $date = date('Y-m');
@@ -71,16 +91,17 @@ class ImageRepository
         $sessionImage->file_size = $photo->getSize();
         $sessionImage->file_extension = $photo->getClientOriginalExtension();
         $sessionImage->full_size_directory = 'storage/uploads/fullsize/' . $folder_name . '/' . $allowed_filename;
-        $sessionImage->icon_size_directory = 'storage/uploads/iconsize/' . $folder_name . '/' . $allowed_filename;
+        $sessionImage->icon_size_directory = $extension === 'pdf'
+            ? 'frontend/img/pdf-page.png'
+            : 'storage/uploads/iconsize/' . $folder_name . '/' . $allowed_filename;
         $sessionImage->status = 1;
         $sessionImage->user_id = Auth::user()->id;
         $sessionImage->save();
 
-        return Response::json([
+        return [
             'error' => false,
-            'code' => 200
-        ], 200);
-
+            'image' => $sessionImage
+        ];
     }
 
     /**

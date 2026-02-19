@@ -45,6 +45,11 @@
                             <i class="fa fa-toggle-{{ (request()->get('info_type') == 'status') ? 'on' : 'off'  }}"
                                aria-hidden="true"></i> Status & Message
                         </a>
+                                <a href="?info_type=proofs" type="button"
+                                    class="btn {{ (request()->get('info_type') == 'proofs') ? ' btn-success' : ' btn-default'  }} ">
+                                     <i class="fa fa-toggle-{{ (request()->get('info_type') == 'proofs') ? 'on' : 'off'  }}"
+                                         aria-hidden="true"></i> Proofs
+                                </a>
                                 <a href="?info_type=activity" type="button"
                                     class="btn {{ (request()->get('info_type') == 'activity') ? ' btn-success' : ' btn-default'  }} ">
                                      <i class="fa fa-toggle-{{ (request()->get('info_type') == 'activity') ? 'on' : 'off'  }}"
@@ -66,6 +71,8 @@
                 @include('order.order-details.status')
             @elseif(request()->get('info_type') == 'activity')
                 @include('order.order-details.activity_logs')
+            @elseif(request()->get('info_type') == 'proofs')
+                @include('order.order-details.proofs')
             @endif
 
         </div>
@@ -85,4 +92,47 @@
             padding-bottom: 5px;
         }
     </style>
+    @if(request()->get('info_type') == 'proofs')
+        <script src="{{ asset('public/plugins/dropzone.js') }}"></script>
+        <script>
+            if (window.Dropzone) {
+                Dropzone.options.proofsDropzone = {
+                    uploadMultiple: false,
+                    parallelUploads: 5,
+                    maxFilesize: 8,
+                    acceptedFiles: 'image/*,application/pdf',
+                    previewsContainer: '#proofsDropzonePreview',
+                    previewTemplate: document.querySelector('#proofs-preview-template').innerHTML,
+                    addRemoveLinks: true,
+                    dictRemoveFile: 'Remove',
+                    dictFileTooBig: 'File is bigger than 8MB',
+                    init: function () {
+                        this.on('success', function (file, response) {
+                            if (response && response.proof_id) {
+                                file.proof_id = response.proof_id;
+                            }
+                            if (window.jQuery) {
+                                jQuery('#proofs_list').load(location.href + ' #proofs_list > *');
+                            }
+                        });
+                        this.on('removedfile', function (file) {
+                            if (!file.proof_id) {
+                                return;
+                            }
+                            if (window.jQuery) {
+                                jQuery.ajax({
+                                    type: 'POST',
+                                    url: '{{ url('order/proofs') }}/' + file.proof_id,
+                                    data: {_method: 'DELETE', _token: '{{ csrf_token() }}'},
+                                    success: function () {
+                                        jQuery('#proofs_list').load(location.href + ' #proofs_list > *');
+                                    }
+                                });
+                            }
+                        });
+                    }
+                };
+            }
+        </script>
+    @endif
 @endsection

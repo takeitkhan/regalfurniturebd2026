@@ -100,6 +100,8 @@ Route::middleware(['outlet'])->group(function () {
 
     Route::post('order/payment-status', ['as' => 'order.payment_status', 'uses' => '\App\Http\Controllers\Admin\OrdersManagement@payment_status_update'])->name('order.payment_status');
     Route::post('order/payment-method', ['as' => 'order.payment_method', 'uses' => '\App\Http\Controllers\Admin\OrdersManagement@payment_method_update'])->name('order.payment_method');
+    Route::post('order/proofs', [OrdersManagement::class, 'proofsStore'])->name('order.proofs.store');
+    Route::delete('order/proofs/{proof}', [OrdersManagement::class, 'proofsDelete'])->name('order.proofs.delete');
 
     // posts panel routes
     Route::get('posts', ['as' => 'posts', 'uses' => '\App\Http\Controllers\Admin\PostController@posts'])->name('posts');

@@ -1,6 +1,7 @@
 @php
     $orderId = $order_master->id ?? null;
     $detailIds = ($order_details ?? collect())->pluck('id')->all();
+    $proofIds = $orderId ? \App\Models\OrderProof::where('order_id', $orderId)->pluck('id')->all() : [];
     $activity_logs = \App\Models\ActivityLog::with('user')
         ->where(function ($q) use ($orderId, $detailIds) {
             if ($orderId) {
@@ -14,6 +15,12 @@
                     $q3->where('entity_type', 'orders_detail')
                         ->whereIn('entity_id', $detailIds);
                 });
+            }
+        })
+        ->orWhere(function ($q4) use ($proofIds) {
+            if (!empty($proofIds)) {
+                $q4->where('entity_type', 'order_proof')
+                    ->whereIn('entity_id', $proofIds);
             }
         })
         ->orderBy('id', 'desc')

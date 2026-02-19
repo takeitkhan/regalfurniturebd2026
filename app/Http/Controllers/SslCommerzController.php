@@ -6,6 +6,7 @@ use DB;
 
 use Illuminate\Http\Request;
 use App\Library\SslCommerz\SslCommerzNotification;
+use App\Models\ActivityLog;
 use App\Models\PaymentSetting;
 use App\Repositories\Dashboard\DashboardInterface;
 use App\Repositories\OrdersMaster\OrdersMasterInterface;
@@ -287,6 +288,22 @@ class SslCommerzController extends Controller
                 'trans_id' => $tranAmount
             ]);
 
+            try {
+                ActivityLog::create([
+                    'user_id' => $om->user_id,
+                    'action' => 'payment_status_update_gateway',
+                    'entity_type' => 'orders_master',
+                    'entity_id' => $order_id,
+                    'old_values' => ['payment_term_status' => $om->payment_term_status],
+                    'new_values' => ['payment_term_status' => $status],
+                    'note' => 'SSLCommerz payment update',
+                    'ip' => $request->ip(),
+                    'url' => $request->fullUrl()
+                ]);
+            } catch (\Exception $e) {
+                // Logging failure should not break payment flow
+            }
+
             $this->session_data->updateByKey($cart_token, null);
             $this->session_data->updateByKey($pm_token, null);
             $this->session_data->updateByKey($ud_token, null);
@@ -357,6 +374,22 @@ class SslCommerzController extends Controller
                 'amount_paid' => $amountPaid,
                 'trans_id' => $tranAmount
             ]);
+
+            try {
+                ActivityLog::create([
+                    'user_id' => $om->user_id,
+                    'action' => 'payment_status_update_gateway',
+                    'entity_type' => 'orders_master',
+                    'entity_id' => $order_id,
+                    'old_values' => ['payment_term_status' => $om->payment_term_status],
+                    'new_values' => ['payment_term_status' => $status],
+                    'note' => 'SSLCommerz IPN update',
+                    'ip' => $request->ip(),
+                    'url' => $request->fullUrl()
+                ]);
+            } catch (\Exception $e) {
+                // Logging failure should not break payment flow
+            }
 
 
             $this->session_data->updateByKey($cart_token, null);

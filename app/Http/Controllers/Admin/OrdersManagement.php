@@ -14,6 +14,8 @@ use App\Exports\OrdersExport;
 use App\Helpers\OrderMailHelper;
 use App\Exports\OrderSearchExport;
 use App\Http\Controllers\Controller;
+use App\Models\OrderProof;
+use App\Repositories\Media\ImageRepository;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Contracts\View\Factory;
 use App\Repositories\User\UserInterface;
@@ -55,6 +57,10 @@ class OrdersManagement extends Controller
      * @var MessageInterface
      */
     private $message;
+    /**
+     * @var ImageRepository
+     */
+    private $imageRepository;
     
     /**
      * OrdersManagement constructor.
@@ -71,8 +77,10 @@ class OrdersManagement extends Controller
                                 OrdersDetailInterface   $ordersdetail,
                                 PaymentSettingInterface $paymentsetting,
                                 PointInterface          $point,
-                                DashboardInterface      $dashboard, UserInterface $user,
-                                MessageInterface        $message)
+                                DashboardInterface      $dashboard,
+                                UserInterface           $user,
+                                MessageInterface        $message,
+                                ImageRepository         $imageRepository)
     {
         $this->ordersdetail = $ordersdetail;
         $this->ordersmaster = $ordersmaster;
@@ -81,6 +89,7 @@ class OrdersManagement extends Controller
         $this->dashboard = $dashboard;
         $this->user = $user;
         $this->message = $message;
+        $this->imageRepository = $imageRepository;
     }
     /**
      * @return Factory|View
@@ -209,6 +218,103 @@ public function orders(Request $request)
             'order_master' => $orderMaster,
             'order_details' => $orderDetails
         ]);
+    }
+
+    public function proofsStore(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|integer',
+            'file' => 'required|file|max:8192|mimes:png,gif,jpeg,jpg,bmp,webp,pdf'
+        ]);
+
+        $order = $this->ordersmaster->getById($request->order_id);
+
+        if (!$order) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Order not found.',
+                'code' => 404
+            ], 404);
+        }
+
+        $result = $this->imageRepository->storeFile($request->all());
+
+        if ($result['error']) {
+            return response()->json([
+                'error' => true,
+                'message' => $result['message'],
+                'code' => $result['code']
+            ], $result['code']);
+        }
+
+        $proof = OrderProof::create([
+            'order_id' => $order->id,
+            'image_id' => $result['image']->id,
+            'created_by' => auth()->id(),
+            'note' => $request->get('note')
+        ]);
+
+        try {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'order_proof_added',
+                'entity_type' => 'order_proof',
+                'entity_id' => $proof->id,
+                'old_values' => null,
+                'new_values' => [
+                    'order_id' => $order->id,
+                    'image_id' => $result['image']->id,
+                    'file_name' => $result['image']->original_name ?? null,
+                    'file_extension' => $result['image']->file_extension ?? null
+                ],
+                'note' => $request->get('note'),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl()
+            ]);
+        } catch (\Exception $e) {
+            // Logging failure should not break upload flow
+        }
+
+        return response()->json([
+            'error' => false,
+            'code' => 200,
+            'proof_id' => $proof->id,
+            'image_id' => $result['image']->id
+        ], 200);
+    }
+
+    public function proofsDelete($id)
+    {
+        $proof = OrderProof::with('image')->findOrFail($id);
+
+        try {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'order_proof_deleted',
+                'entity_type' => 'order_proof',
+                'entity_id' => $proof->id,
+                'old_values' => [
+                    'order_id' => $proof->order_id,
+                    'image_id' => $proof->image_id,
+                    'file_name' => $proof->image->original_name ?? null,
+                    'file_extension' => $proof->image->file_extension ?? null
+                ],
+                'new_values' => null,
+                'note' => null,
+                'ip' => request()->ip(),
+                'url' => request()->fullUrl()
+            ]);
+        } catch (\Exception $e) {
+            // Logging failure should not break delete flow
+        }
+
+        if (!empty($proof->image_id)) {
+            $this->imageRepository->delete($proof->image_id);
+        }
+
+        $proof->delete();
+
+        return redirect()->back()->with('success', 'Proof deleted successfully.');
     }
     
     public function move(Request $request)

@@ -9,7 +9,7 @@ class Image extends Model
     protected $fillable = ['file_name', 'file_type', 'file_size', 'file_extension', 'file_directory', 'status', 'user_id'];
 
     public static $rules = [
-        'file' => 'required|mimes:png,gif,jpeg,jpg,bmp,webp'
+        'file' => 'required|mimes:png,gif,jpeg,jpg,bmp,webp,pdf'
     ];
     
     public static $messages = [

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ActivityLog;
 
 class OrdersMaster extends Model
 {
@@ -20,6 +21,41 @@ class OrdersMaster extends Model
     public function orderdetails(){
 
         return $this->hasMany(OrdersDetail::class,'order_random','order_random')->with('firstImage','product');
+    }
+
+    public function proofs()
+    {
+        return $this->hasMany(OrderProof::class, 'order_id');
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            try {
+                ActivityLog::create([
+                    'user_id' => auth()->id() ?? $order->user_id,
+                    'action' => 'order_created',
+                    'entity_type' => 'orders_master',
+                    'entity_id' => $order->id,
+                    'old_values' => null,
+                    'new_values' => [
+                        'order_status' => $order->order_status,
+                        'payment_term_status' => $order->payment_term_status,
+                        'payment_method' => $order->payment_method,
+                        'order_from' => $order->order_from
+                    ],
+                    'note' => 'Order placed',
+                    'ip' => request()->ip(),
+                    'url' => request()->fullUrl()
+                ]);
+            } catch (\Exception $e) {
+                // Logging failure should not break order creation
+            }
+        });
     }
 
 }
