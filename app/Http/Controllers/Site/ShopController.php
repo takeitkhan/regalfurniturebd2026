@@ -1509,7 +1509,8 @@ class ShopController extends Controller
                              */
 
                             $old_status = $orders_master->payment_term_status ?? null;
-                            $orders_master = $this->ordersmaster->update($request->value_a, ['payment_term_status' => 'Successful', 'trans_id' => $tran_id]);
+                            $old_order_status = $orders_master->order_status ?? null;
+                            $orders_master = $this->ordersmaster->update($request->value_a, ['payment_term_status' => 'Successful', 'order_status' => 'placed', 'trans_id' => $tran_id]);
 
                             try {
                                 ActivityLog::create([
@@ -1517,8 +1518,8 @@ class ShopController extends Controller
                                     'action' => 'payment_status_update_gateway',
                                     'entity_type' => 'orders_master',
                                     'entity_id' => $orders_master->id ?? $request->value_a,
-                                    'old_values' => ['payment_term_status' => $old_status],
-                                    'new_values' => ['payment_term_status' => 'Successful'],
+                                    'old_values' => ['payment_term_status' => $old_status, 'order_status' => $old_order_status],
+                                    'new_values' => ['payment_term_status' => 'Successful', 'order_status' => 'placed'],
                                     'note' => 'SSLCommerz validation update',
                                     'ip' => $request->ip(),
                                     'url' => $request->fullUrl()

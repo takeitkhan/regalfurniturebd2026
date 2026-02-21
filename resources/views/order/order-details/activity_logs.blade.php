@@ -26,6 +26,18 @@
         ->orderBy('id', 'desc')
         ->take(100)
         ->get();
+
+    $formatLogValue = function ($value) {
+        if (is_array($value)) {
+            return implode(', ', array_map(function ($item) {
+                $item = is_array($item) ? json_encode($item) : (string) $item;
+                return \Illuminate\Support\Str::limit(strip_tags($item), 160);
+            }, $value));
+        }
+
+        $value = is_null($value) ? '' : (string) $value;
+        return \Illuminate\Support\Str::limit(strip_tags($value), 160);
+    };
 @endphp
 
 <div class="row">
@@ -55,18 +67,27 @@
                                 <td>{{ $log->user->name ?? 'System' }}</td>
                                 <td>{{ $log->action }}</td>
                                 <td>{{ $log->entity_type }}{{ $log->entity_id ? ' #' . $log->entity_id : '' }}</td>
-                                <td>{{ \Illuminate\Support\Str::limit(json_encode($log->old_values), 160) }}</td>
-                                <td style="width: 240px; max-width: 240px; word-break: break-word;">
-                                    @php $newValues = (array) ($log->new_values ?? []); @endphp
-                                    @if(!empty($newValues))
-                                        @foreach($newValues as $k => $v)
-                                            <div><strong>{{ $k }}:</strong> {{ is_array($v) ? implode(', ', $v) : $v }}</div>
+                                <td>
+                                    @php $oldValues = (array) ($log->old_values ?? []); @endphp
+                                    @if(!empty($oldValues))
+                                        @foreach($oldValues as $k => $v)
+                                            <div><strong>{{ $k }}:</strong> {{ $formatLogValue($v) }}</div>
                                         @endforeach
                                     @else
                                         -
                                     @endif
                                 </td>
-                                <td>{{ \Illuminate\Support\Str::limit($log->note, 160) }}</td>
+                                <td style="width: 240px; max-width: 240px; word-break: break-word;">
+                                    @php $newValues = (array) ($log->new_values ?? []); @endphp
+                                    @if(!empty($newValues))
+                                        @foreach($newValues as $k => $v)
+                                            <div><strong>{{ $k }}:</strong> {{ $formatLogValue($v) }}</div>
+                                        @endforeach
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>{{ \Illuminate\Support\Str::limit(strip_tags($log->note), 160) }}</td>
                             </tr>
                         @empty
                             <tr>

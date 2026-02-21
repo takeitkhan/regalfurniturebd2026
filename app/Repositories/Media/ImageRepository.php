@@ -111,16 +111,19 @@ class ImageRepository
      */
     public function createUniqueFilename($filename, $extension)
     {
-        $full_size_dir = Config::get('images.full_size');
-        $full_image_path = $full_size_dir . $filename . '.' . $extension;
+        $full_size_dir = $this->upload_path(true);
+        $full_size_dir = rtrim($full_size_dir, '/');
 
-        if (File::exists($full_image_path)) {
-            // Generate token for image
+        $candidate = $filename . '.' . $extension;
+        $full_image_path = $full_size_dir . '/' . $candidate;
+
+        while (File::exists($full_image_path)) {
             $imageToken = substr(sha1(mt_rand()), 0, 5);
-            return $filename . '-' . $imageToken . '.' . $extension;
+            $candidate = $filename . '-' . $imageToken . '.' . $extension;
+            $full_image_path = $full_size_dir . '/' . $candidate;
         }
 
-        return $filename . '.' . $extension;
+        return $candidate;
     }
 
     /**

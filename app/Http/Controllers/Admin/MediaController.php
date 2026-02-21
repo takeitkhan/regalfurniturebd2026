@@ -49,6 +49,50 @@ class MediaController extends Controller
     }
 
     /**
+     * Search medias for product image picker
+     * @param Request $request
+     * @return 
+     */
+    public function search(Request $request)
+    {
+        $keyword = trim((string) $request->get('q', ''));
+        $limit = (int) $request->get('limit', 20);
+        $limit = $limit > 0 ? min($limit, 50) : 20;
+        $page = (int) $request->get('page', 1);
+        $page = $page > 0 ? $page : 1;
+
+        $query = $this->media->self()->where('status', 1);
+
+        if ($keyword !== '') {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('original_name', 'like', "%{$keyword}%")
+                    ->orWhere('filename', 'like', "%{$keyword}%")
+                    ->orWhere('file_type', 'like', "%{$keyword}%");
+            });
+        }
+
+        $medias = $query->orderBy('id', 'desc')->paginate($limit, ['*'], 'page', $page);
+
+        return response()->json([
+            'medias' => $medias->getCollection()->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'filename' => $media->filename,
+                    'full_size_directory' => $media->full_size_directory,
+                    'icon_size_directory' => $media->icon_size_directory,
+                    'original_name' => $media->original_name,
+                    'file_type' => $media->file_type,
+                ];
+            })->values(),
+            'count' => $medias->count(),
+            'total' => $medias->total(),
+            'per_page' => $medias->perPage(),
+            'current_page' => $medias->currentPage(),
+            'last_page' => $medias->lastPage(),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response

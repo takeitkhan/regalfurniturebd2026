@@ -415,7 +415,7 @@ class ProductController extends Controller
 
 
             if ($premision) {
-                $medias = $this->media->self()->orderBy('id', 'DESC')->limit(10)->get();
+                $medias = $this->media->getAll();
                 $variations = $this->variation->getAll();
                 $terms = $this->term->getAll()->toArray();
                 $variationGroups = VariationGroup::all();

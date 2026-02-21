@@ -74,15 +74,24 @@
 
         @component('component.dropzone')
         @endcomponent
+        <div class="form-group" style="margin-top: 10px;">
+            <label for="media_search_input">Search images</label>
+            <input type="text" id="media_search_input" class="form-control"
+                   placeholder="Search by filename or type" autocomplete="off">
+            <small id="media_search_status" class="text-muted"></small>
+        </div>
         @if(!empty($medias))
             <div class="" id="reload_me">
                 <table class="table table-bordered">
+                    <thead>
                     <tr>
                         <th>#</th>
                         <th>Media Informations</th>
                         <th style="width: 20%;">Image</th>
                         <th style="width: 5%;">Action</th>
                     </tr>
+                    </thead>
+                    <tbody id="media_results_body">
                     @foreach($medias as $media)
                         <tr>
                             <td>{{ $media->id }}</td>
@@ -116,7 +125,53 @@
                             </td>
                         </tr>
                     @endforeach
+                    </tbody>
                 </table>
+                <div class="text-center" id="media_pagination" style="margin-top: 10px;">
+                    @if(is_object($medias) && method_exists($medias, 'lastPage'))
+                        @php
+                            $current = $medias->currentPage();
+                            $last = $medias->lastPage();
+                            $window = 5;
+                            $start = max(1, $current - intdiv($window, 2));
+                            $end = min($last, $start + $window - 1);
+                            if (($end - $start + 1) < $window) {
+                                $start = max(1, $end - $window + 1);
+                            }
+                        @endphp
+                        @if($last > 1)
+                            <ul class="pagination pagination-sm" style="margin:0;">
+                                <li class="{{ $current <= 1 ? 'disabled' : '' }}">
+                                    <a href="{{ $current <= 1 ? 'javascript:void(0);' : $medias->appends(request()->except('page'))->url($current - 1) }}">«</a>
+                                </li>
+
+                                @if($start > 1)
+                                    <li><a href="{{ $medias->appends(request()->except('page'))->url(1) }}">1</a></li>
+                                    @if($start > 2)
+                                        <li class="disabled"><span>…</span></li>
+                                    @endif
+                                @endif
+
+                                @for($i = $start; $i <= $end; $i++)
+                                    <li class="{{ $i == $current ? 'active' : '' }}">
+                                        <a href="{{ $medias->appends(request()->except('page'))->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+
+                                @if($end < $last)
+                                    @if($end < $last - 1)
+                                        <li class="disabled"><span>…</span></li>
+                                    @endif
+                                    <li><a href="{{ $medias->appends(request()->except('page'))->url($last) }}">{{ $last }}</a></li>
+                                @endif
+
+                                <li class="{{ $current >= $last ? 'disabled' : '' }}">
+                                    <a href="{{ $current >= $last ? 'javascript:void(0);' : $medias->appends(request()->except('page'))->url($current + 1) }}">»</a>
+                                </li>
+                            </ul>
+                        @endif
+                    @endif
+                </div>
             </div>
         @endif
     </div>
@@ -149,4 +204,158 @@
         console.log(id,parseInt(val), parseInt(product_id))
 
     }
+
+    (function ($) {
+        var searchTimer = null;
+        var $input = $('#media_search_input');
+        var $status = $('#media_search_status');
+        var $tbody = $('#media_results_body');
+        var $pagination = $('#media_pagination');
+        var searchUrl = "{{ route('medias.search') }}";
+        var userId = "{!! (!empty(\Auth::user()->id) ? \Auth::user()->id : NULL) !!}";
+        var mainPid = "{{ !empty($product->id) ? $product->id : null }}";
+        var currentPage = 1;
+
+        if ($input.length === 0 || $tbody.length === 0) {
+            return;
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function renderRows(items) {
+            var html = '';
+            if (!items || items.length === 0) {
+                $tbody.html('');
+                return;
+            }
+
+            items.forEach(function (media) {
+                var filename = escapeHtml(media.filename || '');
+                var fullsize = escapeHtml(media.full_size_directory || '');
+                var iconsize = escapeHtml(media.icon_size_directory || '');
+                var imgUrl = "{{ url('') }}/" + (media.icon_size_directory || '');
+
+                html += '<tr>'
+                    + '<td>' + escapeHtml(media.id) + '</td>'
+                    + '<td><small>'
+                    + '<strong>FN: </strong>' + filename + '<br/>'
+                    + '<strong>Full: </strong>' + fullsize + '<br/>'
+                    + '<strong>Icon: </strong>' + iconsize
+                    + '</small></td>'
+                    + '<td><img src="' + imgUrl + '" class="img-responsive" style="max-height: 60px;"/></td>'
+                    + '<td>'
+                    + '<a href="javascript:void(0);"'
+                    + ' data-userid="' + escapeHtml(userId) + '"'
+                    + ' data-mainpid="' + escapeHtml(mainPid) + '"'
+                    + ' data-id="' + escapeHtml(media.id) + '"'
+                    + ' data-filename="' + filename + '"'
+                    + ' data-fullsize="' + fullsize + '"'
+                    + ' data-iconsize="' + iconsize + '"'
+                    + ' class="btn btn-xs btn-success" id="use_product_image" role="button">Use</a>'
+                    + '</td>'
+                    + '</tr>';
+            });
+
+            $tbody.html(html);
+        }
+
+        function renderPagination(meta) {
+            if (!meta || meta.last_page <= 1) {
+                $pagination.html('');
+                return;
+            }
+
+            var current = parseInt(meta.current_page, 10) || 1;
+            var last = parseInt(meta.last_page, 10) || 1;
+            var windowSize = 5;
+            var start = Math.max(1, current - Math.floor(windowSize / 2));
+            var end = Math.min(last, start + windowSize - 1);
+            if (end - start + 1 < windowSize) {
+                start = Math.max(1, end - windowSize + 1);
+            }
+
+            var html = '<ul class="pagination pagination-sm" style="margin:0;">';
+
+            var prevDisabled = current <= 1 ? ' disabled' : '';
+            html += '<li class="' + prevDisabled + '">'
+                + '<a class="media-page-btn" href="javascript:void(0);" data-page="' + (current - 1) + '">«</a>'
+                + '</li>';
+
+            if (start > 1) {
+                html += '<li><a class="media-page-btn" href="javascript:void(0);" data-page="1">1</a></li>';
+                if (start > 2) {
+                    html += '<li class="disabled"><span>…</span></li>';
+                }
+            }
+
+            for (var i = start; i <= end; i++) {
+                var active = i === current ? ' active' : '';
+                html += '<li class="' + active + '">'
+                    + '<a class="media-page-btn" href="javascript:void(0);" data-page="' + i + '">' + i + '</a>'
+                    + '</li>';
+            }
+
+            if (end < last) {
+                if (end < last - 1) {
+                    html += '<li class="disabled"><span>…</span></li>';
+                }
+                html += '<li><a class="media-page-btn" href="javascript:void(0);" data-page="' + last + '">' + last + '</a></li>';
+            }
+
+            var nextDisabled = current >= last ? ' disabled' : '';
+            html += '<li class="' + nextDisabled + '">'
+                + '<a class="media-page-btn" href="javascript:void(0);" data-page="' + (current + 1) + '">»</a>'
+                + '</li>';
+
+            html += '</ul>';
+            $pagination.html(html);
+        }
+
+        function doSearch(page) {
+            var query = $.trim($input.val());
+            var pageNo = page || 1;
+            currentPage = pageNo;
+            $status.text('Searching...');
+            $.ajax({
+                url: searchUrl,
+                method: 'GET',
+                data: { q: query, limit: 20, page: pageNo },
+                success: function (res) {
+                    renderRows(res.medias || []);
+                    renderPagination({
+                        current_page: res.current_page || 1,
+                        last_page: res.last_page || 1
+                    });
+                    if (res && typeof res.count !== 'undefined') {
+                        var totalText = res.total ? (res.total + ' total') : (res.count + ' items');
+                        $status.text(res.count > 0 ? totalText : (query ? 'No results' : ''));
+                    } else {
+                        $status.text('');
+                    }
+                },
+                error: function () {
+                    $status.text('Failed to load');
+                }
+            });
+        }
+
+        $input.on('keyup', function () {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function () {
+                doSearch(1);
+            }, 400);
+        });
+
+        $pagination.on('click', '.media-page-btn', function () {
+            var page = parseInt($(this).data('page'), 10) || 1;
+            doSearch(page);
+        });
+    })(jQuery);
 </script>

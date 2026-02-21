@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 
 use App\Models\SessionData;
+use App\Models\ActivityLog;
 use DB;
 use App\Http\Controllers\Controller;
 use App\Repositories\Dashboard\DashboardInterface;
@@ -102,6 +103,27 @@ class NagadController extends Controller
                 $orderplacing = $this->ordersmaster->create($orders_master_attributes);
                 $orderplacing->payment_term_status = 'Pending';
                 $orderplacing->save();
+
+                        try {
+                            ActivityLog::create([
+                                'user_id' => $orderplacing->user_id,
+                                'action' => 'order_created_api',
+                                'entity_type' => 'orders_master',
+                                'entity_id' => $orderplacing->id,
+                                'old_values' => [],
+                                'new_values' => [
+                                    'order_status' => $orderplacing->order_status,
+                                    'payment_method' => $orderplacing->payment_method,
+                                    'payment_term_status' => $orderplacing->payment_term_status,
+                                    'order_from' => $orderplacing->order_from
+                                ],
+                                'note' => 'Order placed via API (Nagad)',
+                                'ip' => $request->ip(),
+                                'url' => $request->fullUrl()
+                            ]);
+                        } catch (\Exception $e) {
+                            // ignore logging failures
+                        }
 
                 $post_data['value_b'] = $orderplacing->id;
                 $OrderId = $orderplacing->id;
@@ -255,9 +277,33 @@ class NagadController extends Controller
 
             $order = $this->ordersmaster->update($arr['orderId'], [
                 'payment_term_status' => "Successful",
+                'order_status' => 'placed',
                 'amount_paid' => $amountPaid,
                 'trans_id' => $tranAmount
             ]);
+
+            try {
+                ActivityLog::create([
+                    'user_id' => $om->user_id,
+                    'action' => 'payment_status_update_gateway',
+                    'entity_type' => 'orders_master',
+                    'entity_id' => $om->id,
+                    'old_values' => [
+                        'payment_term_status' => $om->payment_term_status,
+                        'order_status' => $om->order_status
+                    ],
+                    'new_values' => [
+                        'payment_term_status' => 'Successful',
+                        'order_status' => 'placed',
+                        'amount_paid' => $amountPaid
+                    ],
+                    'note' => 'Nagad payment success',
+                    'ip' => $request->ip(),
+                    'url' => $request->fullUrl()
+                ]);
+            } catch (\Exception $e) {
+                // ignore logging failures
+            }
 
 
             $this->session_data->updateByKey($cart_token, null);

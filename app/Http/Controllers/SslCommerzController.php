@@ -284,6 +284,7 @@ class SslCommerzController extends Controller
 
             $order = $this->ordersmaster->update($order_id, [
                 'payment_term_status' => $status,
+                'order_status' => 'placed',
                 'amount_paid' => $amountPaid,
                 'trans_id' => $tranAmount
             ]);
@@ -294,8 +295,14 @@ class SslCommerzController extends Controller
                     'action' => 'payment_status_update_gateway',
                     'entity_type' => 'orders_master',
                     'entity_id' => $order_id,
-                    'old_values' => ['payment_term_status' => $om->payment_term_status],
-                    'new_values' => ['payment_term_status' => $status],
+                    'old_values' => [
+                        'payment_term_status' => $om->payment_term_status,
+                        'order_status' => $om->order_status
+                    ],
+                    'new_values' => [
+                        'payment_term_status' => $status,
+                        'order_status' => 'placed'
+                    ],
                     'note' => 'SSLCommerz payment update',
                     'ip' => $request->ip(),
                     'url' => $request->fullUrl()
@@ -371,6 +378,7 @@ class SslCommerzController extends Controller
 
             $order = $this->ordersmaster->update($order_id, [
                 'payment_term_status' => $status,
+                'order_status' => 'placed',
                 'amount_paid' => $amountPaid,
                 'trans_id' => $tranAmount
             ]);
@@ -381,8 +389,14 @@ class SslCommerzController extends Controller
                     'action' => 'payment_status_update_gateway',
                     'entity_type' => 'orders_master',
                     'entity_id' => $order_id,
-                    'old_values' => ['payment_term_status' => $om->payment_term_status],
-                    'new_values' => ['payment_term_status' => $status],
+                    'old_values' => [
+                        'payment_term_status' => $om->payment_term_status,
+                        'order_status' => $om->order_status
+                    ],
+                    'new_values' => [
+                        'payment_term_status' => $status,
+                        'order_status' => 'placed'
+                    ],
                     'note' => 'SSLCommerz IPN update',
                     'ip' => $request->ip(),
                     'url' => $request->fullUrl()

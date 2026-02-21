@@ -76,6 +76,7 @@ Route::group(['middleware' => ['cors']], function () {
 
 Route::prefix('medias')->middleware(['outlet'])->group(function () {
     Route::get('/all', '\App\Http\Controllers\Admin\MediaController@index')->name('allmedias');
+    Route::get('/search', '\App\Http\Controllers\Admin\MediaController@search')->name('medias.search');
 });
 
 // Route::post('/frontend/ssl_ipn_handler','\App\Http\Controllers\Site\ShopController@ipn');
