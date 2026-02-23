@@ -35,72 +35,30 @@
                             {{ Form::text('sku', $getAttribute['sku']??'', ['class' => 'form-control input-sm', 'placeholder' => 'SKU']) }}
                         </div>
                         <div class="col-md-2 col-sm-4 col-xs-6">
+                            <select name="availability_tag" class="form-control input-sm">
+                                <option value="">Availability Tags</option>
+                                <option value="enable_variation" {{ ($getAttribute['availability_tag']??'') == 'enable_variation' ? 'selected' : '' }}>Enable Variation</option>
+                                <option value="express_delivery" {{ ($getAttribute['availability_tag']??'') == 'express_delivery' ? 'selected' : '' }}>Express Delivery</option>
+                                <option value="new_arrival" {{ ($getAttribute['availability_tag']??'') == 'new_arrival' ? 'selected' : '' }}>New Arrival</option>
+                                <option value="enable_comment" {{ ($getAttribute['availability_tag']??'') == 'enable_comment' ? 'selected' : '' }}>Enable Comment</option>
+                                <option value="enable_review" {{ ($getAttribute['availability_tag']??'') == 'enable_review' ? 'selected' : '' }}>Enable Review</option>
+                                <option value="best_selling" {{ ($getAttribute['availability_tag']??'') == 'best_selling' ? 'selected' : '' }}>Best Selling</option>
+                                <option value="recommended" {{ ($getAttribute['availability_tag']??'') == 'recommended' ? 'selected' : '' }}>Recommended</option>
+                                <option value="multiple_pricing" {{ ($getAttribute['availability_tag']??'') == 'multiple_pricing' ? 'selected' : '' }}>Multiple Pricing</option>
+                                <option value="emi_available" {{ ($getAttribute['availability_tag']??'') == 'emi_available' ? 'selected' : '' }}>EMI Available</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 6px;">
+                        <div class="col-md-2 col-sm-4 col-xs-6">
                             <select name="is_active" class="form-control input-sm">
                                 <option value="">Product Status</option>
                                 <option value="1" {{ ($getAttribute['is_active']??'') == '1' ? 'selected' : '' }}>Active</option>
                                 <option value="0" {{ ($getAttribute['is_active']??'') == '0' ? 'selected' : '' }}>Inactive</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div class="row" style="margin-top: 6px;">
-                        <div class="col-md-12">
-                            <h6 style="margin-bottom: 10px; font-weight: bold;">Availability Tags:</h6>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('enable_variation', 'on', (($getAttribute['enable_variation']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Enable Variation
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('express_delivery', 'on', (($getAttribute['express_delivery']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Express Delivery
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('new_arrival', 'on', (($getAttribute['new_arrival']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                New Arrival
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('enable_comment', 'on', (($getAttribute['enable_comment']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Enable Comment
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('enable_review', 'on', (($getAttribute['enable_review']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Enable Review
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('best_selling', 'on', (($getAttribute['best_selling']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Best Selling
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('recommended', 'on', (($getAttribute['recommended']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Recommended
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('multiple_pricing', 'on', (($getAttribute['multiple_pricing']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                Multiple Pricing
-                            </label>
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            <label style="font-weight: normal;">
-                                {{ Form::checkbox('emi_available', 'on', (($getAttribute['emi_available']??'') == 'on'), ['class' => 'checkbox-inline']) }}
-                                EMI Available
-                            </label>
-                        </div>
                     <div class="row" style="margin-top: 6px;">
                         <div class="col-md-2 col-sm-4 col-xs-6">
                             {{ Form::text('price_min', $getAttribute['price_min']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Min']) }}

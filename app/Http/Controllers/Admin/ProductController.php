@@ -185,15 +185,7 @@ class ProductController extends Controller
             $request->price_min,
             $request->price_max,
             $request->is_active,
-            $request->enable_variation,
-            $request->express_delivery,
-            $request->new_arrival,
-            $request->enable_comment,
-            $request->enable_review,
-            $request->best_selling,
-            $request->recommended,
-            $request->multiple_pricing,
-            $request->emi_available,
+            $request->availability_tag,
             $formDate,
             $toDate,
         ])->filter(function ($value) {
@@ -218,15 +210,7 @@ class ProductController extends Controller
             'formDate'          => $formDate,
             'toDate'            => $toDate,
             'is_active'         => $request->is_active,
-            'enable_variation'  => $request->enable_variation,
-            'express_delivery'  => $request->express_delivery,
-            'new_arrival'       => $request->new_arrival,
-            'enable_comment'    => $request->enable_comment,
-            'enable_review'     => $request->enable_review,
-            'best_selling'      => $request->best_selling,
-            'recommended'       => $request->recommended,
-            'multiple_pricing'  => $request->multiple_pricing,
-            'emi_available'     => $request->emi_available,
+            'availability_tag'  => $request->availability_tag,
         ];
 
         $products = $this->product->getAllByRole($filters);
