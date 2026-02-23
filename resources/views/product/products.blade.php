@@ -25,7 +25,7 @@
                 <div class="box-body compact-search">
                     {{ Form::open(array('url' => '/search_products', 'method' => 'get', 'value' => 'PATCH', 'id' => 'search-form')) }}
                     <div class="row">
-                        <div class="col-md-4 col-sm-8 col-xs-12">
+                        <div class="col-md-2 col-sm-8 col-xs-12">
                             {{ Form::text('search_term', $getAttribute['search_term']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Search by Code / Name / Title / SKU']) }}
                         </div>
                         <div class="col-md-2 col-sm-4 col-xs-6">
@@ -42,9 +42,7 @@
                                 <option value="emi_available" {{ ($getAttribute['availability_tag']??'') == 'emi_available' ? 'selected' : '' }}>EMI Available</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div class="row" style="margin-top: 6px;">
                         <div class="col-md-2 col-sm-4 col-xs-6">
                             <select name="is_active" class="form-control input-sm">
                                 <option value="">Product Status</option>
@@ -53,11 +51,10 @@
                             </select>
                         </div>
 
-                    <div class="row" style="margin-top: 6px;">
-                        <div class="col-md-2 col-sm-4 col-xs-6">
+                        <div class="col-md-1 col-sm-4 col-xs-6">
                             {{ Form::text('price_min', $getAttribute['price_min']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Min']) }}
                         </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
+                        <div class="col-md-1 col-sm-4 col-xs-6">
                             {{ Form::text('price_max', $getAttribute['price_max']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Max']) }}
                         </div>
                         <div class="col-md-1 col-sm-3 col-xs-6">
@@ -74,10 +71,10 @@
                                        name="toDate" id="toDate" class="form-control input-sm datepicker">
                             </div>
                         </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
+                        <div class="col-md-1 col-sm-4 col-xs-6">
                             {{ Form::submit('Search', ['class' => 'btn btn-success btn-sm btn-block']) }}
                         </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
+                        <div class="col-md-1 col-sm-4 col-xs-6">
                             <a class="btn btn-default btn-sm btn-block" href="{{ url('products') }}">Reset</a>
                         </div>
                     </div>
@@ -236,3 +233,12 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+<script type="text/javascript">
+    // Date picker initialization
+    $('.datepicker').datepicker({
+        autoclose: true,
+        format: 'yyyy-mm-dd'
+    });
+</script>
+@endpush
