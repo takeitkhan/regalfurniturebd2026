@@ -22,52 +22,56 @@
                 <div class="box-header with-border">
                     <h5 class="box-title">Advanced Search</h5>
                 </div>
-                <div class="box-body">
-
-
-                    {{ Form::open(array('url' => $url_one, 'method' => 'get', 'value' => 'PATCH', 'id' => '')) }}
+                <div class="box-body compact-search">
+                    {{ Form::open(array('url' => '/search_products', 'method' => 'get', 'value' => 'PATCH', 'id' => 'search-form')) }}
                     <div class="row">
-                        <div class="col-xs-2">
-                            <select name="column" required class="form-control select2" style="width: 100%;">
-                                <option value="title" {{ (Request::post('column') == 'title') ? 'selected="selected"' : 'selected="selected"' }}>
-                                    Title
-                                </option>
-                                <option value="sub_title" {{ (Request::post('column') == 'sub_title') ? 'selected="selected"' : '' }}>
-                                    Sub Title
-                                </option>
-                                <option value="seo_url" {{ (Request::post('column') == 'seo_url') ? 'selected="selected"' : '' }}>
-                                    SEO URL
-                                </option>
-                                <option value="sku" {{ (Request::post('column') == 'sku') ? 'selected="selected"' : '' }}>
-                                    SKU
-                                </option>
-                                <option value="categories" {{ (Request::post('column') == 'categories') ? 'selected="selected"' : '' }}>
-                                    Category ID
-                                </option>
-                                <option value="material" {{ (Request::post('column') == 'material') ? 'selected="selected"' : '' }}>
-                                    Material
-                                </option>
-                                <option value="color" {{ (Request::post('column') == 'color') ? 'selected="selected"' : '' }}>
-                                    Color
-                                </option>
-                                <option value="description" {{ (Request::post('column') == 'description') ? 'selected="selected"' : '' }}>
-                                    Description
-                                </option>
-                                <option value="short_description" {{ (Request::post('column') == 'short_description') ? 'selected="selected"' : '' }}>
-                                    Short Description
-                                </option>
-                                <option value="dimension" {{ (Request::post('column') == 'dimension') ? 'selected="selected"' : '' }}>
-                                    Dimension
-                                </option>
+                        <div class="col-md-4 col-sm-8 col-xs-12">
+                            {{ Form::text('search_term', $getAttribute['search_term']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Product Code / Product Name / Title']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::text('product_code', $getAttribute['product_code']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Product Code']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::text('sku', $getAttribute['sku']??'', ['class' => 'form-control input-sm', 'placeholder' => 'SKU']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <select name="status" class="form-control input-sm">
+                                <option value="">Product Status</option>
+                                <option value="1" {{ ($getAttribute['status']??'') == '1' ? 'selected' : '' }}>Active</option>
+                                <option value="0" {{ ($getAttribute['status']??'') == '0' ? 'selected' : '' }}>Inactive</option>
                             </select>
                         </div>
-                        <div class="col-xs-4">
-                            {{ Form::text('search_key', Request::post('search_key'), ['required', 'class' => 'form-control', 'placeholder' => 'Search Keys...']) }}
+                    </div>
+
+                    <div class="row" style="margin-top: 6px;">
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::text('price_min', $getAttribute['price_min']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Min']) }}
                         </div>
-                        <div class="col-xs-1">
-                            {{ Form::submit('Search', ['class' => 'btn btn-success']) }}
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::text('price_max', $getAttribute['price_max']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Max']) }}
+                        </div>
+                        <div class="col-md-1 col-sm-3 col-xs-6">
+                            <div class="input-group date">
+                                <div class="input-group-addon">From</div>
+                                <input value="{{ $getAttribute['formDate']??'' }}" autocomplete="off" type="text"
+                                       name="formDate" id="formDate" class="form-control input-sm datepicker">
+                            </div>
+                        </div>
+                        <div class="col-md-1 col-sm-3 col-xs-6">
+                            <div class="input-group date">
+                                <div class="input-group-addon">To</div>
+                                <input value="{{ $getAttribute['toDate']??''  }}" autocomplete="off" type="text"
+                                       name="toDate" id="toDate" class="form-control input-sm datepicker">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            {{ Form::submit('Search', ['class' => 'btn btn-success btn-sm btn-block']) }}
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <a class="btn btn-default btn-sm btn-block" href="{{ url('products') }}">Reset</a>
                         </div>
                     </div>
+
                     {{ Form::close() }}
 
                 </div>

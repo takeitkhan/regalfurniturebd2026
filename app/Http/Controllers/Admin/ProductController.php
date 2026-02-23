@@ -164,21 +164,60 @@ class ProductController extends Controller
      */
     public function products(Request $request)
     {
-        //dd($request);
-        $default = [];
-        if (!empty($request)) {
-            $column = $request->get('column');
-            $default = [
-                'column' => $column,
-                'search_key' => $request->get('search_key')
-            ];
-            $products = $this->product->getAllByRole($default);
+        $formDate = null;
+        $toDate   = null;
 
-            return view('product.products', compact('products'))->with(['products' => $products]);
-        } else {
-            $products = $this->product->getAllByRole($default);
-            return view('product.products', compact('products'))->with(['products' => $products]);
+        if ($request->filled(['formDate', 'toDate'])) {
+            $formDate = \Carbon\Carbon::parse($request->formDate)->toDateString();
+            $toDate   = \Carbon\Carbon::parse($request->toDate)->toDateString();
         }
+
+        // Check if there are any active filters
+        $hasFilters = collect([
+            $request->column,
+            $request->search_key,
+            $request->search_term,
+            $request->product_code,
+            $request->product_name,
+            $request->title,
+            $request->sku,
+            $request->category_id,
+            $request->price_min,
+            $request->price_max,
+            $request->status,
+            $formDate,
+            $toDate,
+        ])->filter(function ($value) {
+            return $value !== null && $value !== '';
+        })->isNotEmpty();
+
+        if ($request->is('search_products') && !$hasFilters) {
+            return redirect('products');
+        }
+
+        $filters = [
+            'column'        => $request->column,
+            'search_key'    => $request->search_key,
+            'search_term'   => $request->search_term,
+            'product_code'  => $request->product_code,
+            'product_name'  => $request->product_name,
+            'title'         => $request->title,
+            'sku'           => $request->sku,
+            'category_id'   => $request->category_id,
+            'price_min'     => $request->price_min,
+            'price_max'     => $request->price_max,
+            'formDate'      => $formDate,
+            'toDate'        => $toDate,
+            'status'        => $request->status,
+        ];
+
+        $products = $this->product->getAllByRole($filters);
+        $products->withPath(url()->current());
+
+        return view('product.products', [
+            'products' => $products,
+            'getAttribute' => $request->all(),
+        ]);
     }
 
     /**

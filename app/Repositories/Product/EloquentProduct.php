@@ -580,49 +580,125 @@ class EloquentProduct implements ProductInterface
 
     public function getAllByRole(array $options = array())
     {
-
         $default = array(
             'column' => null,
-            'search_key' => null
+            'search_key' => null,
+            'search_term' => null,
+            'product_code' => null,
+            'product_name' => null,
+            'title' => null,
+            'sku' => null,
+            'category_id' => null,
+            'price_min' => null,
+            'price_max' => null,
+            'formDate' => null,
+            'toDate' => null,
+            'status' => null,
         );
 
         $new = array_merge($default, $options);
 
-        if (!empty($new['search_key']) && !empty($new['column'])) {
-            //dd($this->model->whereRaw('' . $new['column'] . ' like "%' . $new['search_key'] . '%"')->toSql());
-            $data = $this->model->with('category');
-            if (auth()->user()->isVendor()) {
-                $data = $data->where(['user_id' => auth()->user()->id]);
-            }
-
-            $data = $data->leftJoin('product_attribute_variations as pav', 'pav.main_pid', 'products.id')
-                ->select('products.*', 'pav.variation_sub_title', 'pav.variation_product_code'); // nipun
-
-            $data = $data->whereRaw(''.$new['column'].' like "%'.$new['search_key'].'%"');
-
-            //$subTitle = preg_match('/^[^ ].* .*[^ ]$/', $new['search_key']);
-            //dd($subTitle);
-//            dd($new['search_key']);
-
-            $data = $data->orWhere('pav.variation_product_code', 'like', '%'.$new['search_key'].'%'); // nipun
-            $data = $data->orWhere('pav.variation_sub_title', 'like', '%'.$new['search_key'].'%'); // nipun
-
-            //$data = $data->whereRaw('variation_sub_title','Like', '%'.$subTitle.'%');
-//            ->groupBy('id')
-            $data = $data->orderBy('products.id', 'desc')->groupBy('id')->paginate(10);
-//            dd($data);
-            return $data;
-        } else {
-            $data = $this->model->with('category');
-            if (auth()->user()->isVendor()) {
-                $data = $data->where(['user_id' => auth()->user()->id]);
-            }
-
-            $data = $data->orderBy('id', 'desc')
-                ->paginate(10);
-
-            return $data;
+        $data = $this->model->with('category');
+        if (auth()->user()->isVendor()) {
+            $data = $data->where(['user_id' => auth()->user()->id]);
         }
 
+        // Check if there are any active filters
+        $hasFilters = collect([
+            $new['search_key'],
+            $new['search_term'],
+            $new['product_code'],
+            $new['product_name'],
+            $new['title'],
+            $new['sku'],
+            $new['category_id'],
+            $new['price_min'],
+            $new['price_max'],
+            $new['formDate'],
+            $new['toDate'],
+            $new['status'],
+            $new['column'],
+        ])->filter(function ($value) {
+            return $value !== null && $value !== '';
+        })->isNotEmpty();
+
+        if ($hasFilters) {
+            // Join with variation table for product code and name search
+            $needsVariationJoin = !empty($new['search_term']) || !empty($new['product_code']) || !empty($new['product_name']) || !empty($new['search_key']);
+
+            if ($needsVariationJoin) {
+                $data = $data->leftJoin('product_attribute_variations as pav', 'pav.main_pid', 'products.id')
+                    ->select('products.*', 'pav.variation_sub_title', 'pav.variation_product_code');
+            }
+
+            // Apply OR-based text search filters
+            $hasOrFilters = !empty($new['search_key']) || !empty($new['search_term']) || !empty($new['product_code']) 
+                          || !empty($new['product_name']) || !empty($new['title']) || !empty($new['sku']);
+
+            if ($hasOrFilters) {
+                $data = $data->where(function ($query) use ($new) {
+                    // Column-specific search
+                    if (!empty($new['search_key']) && !empty($new['column'])) {
+                        $query->orWhere($new['column'], 'like', '%' . $new['search_key'] . '%');
+                    }
+                    // General search term
+                    if (!empty($new['search_term'])) {
+                        $term = $new['search_term'];
+                        $query->orWhere('products.title', 'like', '%' . $term . '%')
+                              ->orWhere('products.sub_title', 'like', '%' . $term . '%')
+                              ->orWhere('products.product_code', 'like', '%' . $term . '%')
+                              ->orWhere('pav.variation_product_code', 'like', '%' . $term . '%')
+                              ->orWhere('pav.variation_sub_title', 'like', '%' . $term . '%');
+                    }
+                    // Product code search
+                    if (!empty($new['product_code'])) {
+                        $query->orWhere('products.product_code', 'like', '%' . $new['product_code'] . '%')
+                              ->orWhere('pav.variation_product_code', 'like', '%' . $new['product_code'] . '%');
+                    }
+                    // Product name search
+                    if (!empty($new['product_name'])) {
+                        $query->orWhere('products.title', 'like', '%' . $new['product_name'] . '%')
+                              ->orWhere('products.sub_title', 'like', '%' . $new['product_name'] . '%')
+                              ->orWhere('pav.variation_sub_title', 'like', '%' . $new['product_name'] . '%');
+                    }
+                    // Title search
+                    if (!empty($new['title'])) {
+                        $query->orWhere('products.title', 'like', '%' . $new['title'] . '%');
+                    }
+                    // SKU search
+                    if (!empty($new['sku'])) {
+                        $query->orWhere('products.sku', 'like', '%' . $new['sku'] . '%');
+                    }
+                });
+            }
+
+            // Category filter
+            if (!empty($new['category_id'])) {
+                $data = $data->where('products.categories', $new['category_id']);
+            }
+
+            // Price range filter
+            if (!empty($new['price_min']) || !empty($new['price_max'])) {
+                $min = $new['price_min'] !== null ? $new['price_min'] : 0;
+                $max = $new['price_max'] !== null ? $new['price_max'] : 999999999;
+                $data = $data->whereBetween('products.local_selling_price', [$min, $max]);
+            }
+
+            // Date range filter
+            if (!empty($new['formDate']) && !empty($new['toDate'])) {
+                $data = $data->whereBetween('products.created_at', [$new['formDate'], $new['toDate']]);
+            }
+
+            // Status filter
+            if (!empty($new['status'])) {
+                $data = $data->where('products.status', $new['status']);
+            }
+
+            $data = $data->distinct()->orderBy('products.id', 'desc')->groupBy('products.id')->paginate(10);
+        } else {
+            $data = $data->orderBy('id', 'desc')->paginate(10);
+        }
+
+        return $data;
     }
 }

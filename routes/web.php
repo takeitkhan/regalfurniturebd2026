@@ -185,6 +185,7 @@ Route::middleware(['outlet'])->group(function () {
     Route::post('/multiplepricingphoto', '\App\Http\Controllers\Admin\ProductController@MultiplePricingPhoto');
     Route::post('products', ['as' => 'products', 'uses' => '\App\Http\Controllers\Admin\ProductController@products'])->name('products.post');
     Route::get('products', ['as' => 'products', 'uses' => '\App\Http\Controllers\Admin\ProductController@products'])->name('products.get');
+    Route::any('search_products', ['as' => 'search_products', 'uses' => '\App\Http\Controllers\Admin\ProductController@products'])->name('search_products');
 
     Route::get('products_express_delivery', ['as' => 'products_express_delivery', 'uses' => '\App\Http\Controllers\Admin\ProductController@products_express_delivery'])->name('products_express_delivery.get');
     Route::post('products_express_delivery', ['as' => 'products_express_delivery', 'uses' => '\App\Http\Controllers\Admin\ProductController@products_express_delivery'])->name('products_express_delivery.post');
