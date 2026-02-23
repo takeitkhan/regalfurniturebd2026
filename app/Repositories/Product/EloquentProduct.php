@@ -584,10 +584,6 @@ class EloquentProduct implements ProductInterface
             'column' => null,
             'search_key' => null,
             'search_term' => null,
-            'product_code' => null,
-            'product_name' => null,
-            'title' => null,
-            'sku' => null,
             'category_id' => null,
             'price_min' => null,
             'price_max' => null,
@@ -608,10 +604,6 @@ class EloquentProduct implements ProductInterface
         $hasFilters = collect([
             $new['search_key'],
             $new['search_term'],
-            $new['product_code'],
-            $new['product_name'],
-            $new['title'],
-            $new['sku'],
             $new['category_id'],
             $new['price_min'],
             $new['price_max'],
@@ -634,8 +626,7 @@ class EloquentProduct implements ProductInterface
             }
 
             // Apply OR-based text search filters
-            $hasOrFilters = !empty($new['search_key']) || !empty($new['search_term']) || !empty($new['product_code']) 
-                          || !empty($new['product_name']) || !empty($new['title']) || !empty($new['sku']);
+            $hasOrFilters = !empty($new['search_key']) || !empty($new['search_term']);
 
             if ($hasOrFilters) {
                 $data = $data->where(function ($query) use ($new) {
@@ -643,33 +634,15 @@ class EloquentProduct implements ProductInterface
                     if (!empty($new['search_key']) && !empty($new['column'])) {
                         $query->orWhere($new['column'], 'like', '%' . $new['search_key'] . '%');
                     }
-                    // General search term
+                    // General search term - searches across all product fields
                     if (!empty($new['search_term'])) {
                         $term = $new['search_term'];
                         $query->orWhere('products.title', 'like', '%' . $term . '%')
                               ->orWhere('products.sub_title', 'like', '%' . $term . '%')
                               ->orWhere('products.product_code', 'like', '%' . $term . '%')
+                              ->orWhere('products.sku', 'like', '%' . $term . '%')
                               ->orWhere('pav.variation_product_code', 'like', '%' . $term . '%')
                               ->orWhere('pav.variation_sub_title', 'like', '%' . $term . '%');
-                    }
-                    // Product code search
-                    if (!empty($new['product_code'])) {
-                        $query->orWhere('products.product_code', 'like', '%' . $new['product_code'] . '%')
-                              ->orWhere('pav.variation_product_code', 'like', '%' . $new['product_code'] . '%');
-                    }
-                    // Product name search
-                    if (!empty($new['product_name'])) {
-                        $query->orWhere('products.title', 'like', '%' . $new['product_name'] . '%')
-                              ->orWhere('products.sub_title', 'like', '%' . $new['product_name'] . '%')
-                              ->orWhere('pav.variation_sub_title', 'like', '%' . $new['product_name'] . '%');
-                    }
-                    // Title search
-                    if (!empty($new['title'])) {
-                        $query->orWhere('products.title', 'like', '%' . $new['title'] . '%');
-                    }
-                    // SKU search
-                    if (!empty($new['sku'])) {
-                        $query->orWhere('products.sku', 'like', '%' . $new['sku'] . '%');
                     }
                 });
             }

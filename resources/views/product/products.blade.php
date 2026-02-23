@@ -26,13 +26,7 @@
                     {{ Form::open(array('url' => '/search_products', 'method' => 'get', 'value' => 'PATCH', 'id' => 'search-form')) }}
                     <div class="row">
                         <div class="col-md-4 col-sm-8 col-xs-12">
-                            {{ Form::text('search_term', $getAttribute['search_term']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Product Code / Product Name / Title']) }}
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            {{ Form::text('product_code', $getAttribute['product_code']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Product Code']) }}
-                        </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
-                            {{ Form::text('sku', $getAttribute['sku']??'', ['class' => 'form-control input-sm', 'placeholder' => 'SKU']) }}
+                            {{ Form::text('search_term', $getAttribute['search_term']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Search by Code / Name / Title / SKU']) }}
                         </div>
                         <div class="col-md-2 col-sm-4 col-xs-6">
                             <select name="availability_tag" class="form-control input-sm">
