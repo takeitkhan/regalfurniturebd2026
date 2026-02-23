@@ -594,6 +594,15 @@ class EloquentProduct implements ProductInterface
             'formDate' => null,
             'toDate' => null,
             'is_active' => null,
+            'enable_variation' => null,
+            'express_delivery' => null,
+            'new_arrival' => null,
+            'enable_comment' => null,
+            'enable_review' => null,
+            'best_selling' => null,
+            'recommended' => null,
+            'multiple_pricing' => null,
+            'emi_available' => null,
         );
 
         $new = array_merge($default, $options);
@@ -617,6 +626,15 @@ class EloquentProduct implements ProductInterface
             $new['formDate'],
             $new['toDate'],
             $new['is_active'],
+            $new['enable_variation'],
+            $new['express_delivery'],
+            $new['new_arrival'],
+            $new['enable_comment'],
+            $new['enable_review'],
+            $new['best_selling'],
+            $new['recommended'],
+            $new['multiple_pricing'],
+            $new['emi_available'],
             $new['column'],
         ])->filter(function ($value) {
             return $value !== null && $value !== '';
@@ -692,6 +710,35 @@ class EloquentProduct implements ProductInterface
             // Status filter
             if ($new['is_active'] !== null && $new['is_active'] !== '') {
                 $data = $data->where('products.is_active', $new['is_active']);
+            }
+
+            // Availability Tags filters
+            if ($new['enable_variation'] === 'on') {
+                $data = $data->where('products.enable_variation', 'on');
+            }
+            if ($new['express_delivery'] === 'on') {
+                $data = $data->where('products.express_delivery', 'on');
+            }
+            if ($new['new_arrival'] === 'on') {
+                $data = $data->where('products.new_arrival', 'on');
+            }
+            if ($new['enable_comment'] === 'on') {
+                $data = $data->where('products.enable_comment', 'on');
+            }
+            if ($new['enable_review'] === 'on') {
+                $data = $data->where('products.enable_review', 'on');
+            }
+            if ($new['best_selling'] === 'on') {
+                $data = $data->where('products.best_selling', 'on');
+            }
+            if ($new['recommended'] === 'on') {
+                $data = $data->where('products.recommended', 'on');
+            }
+            if ($new['multiple_pricing'] === 'on') {
+                $data = $data->where('products.multiple_pricing', 'on');
+            }
+            if ($new['emi_available'] === 'on') {
+                $data = $data->where('products.emi_available', 'on');
             }
 
             $data = $data->distinct()->orderBy('products.id', 'desc')->groupBy('products.id')->paginate(10);

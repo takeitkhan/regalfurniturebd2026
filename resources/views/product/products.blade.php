@@ -44,6 +44,64 @@
                     </div>
 
                     <div class="row" style="margin-top: 6px;">
+                        <div class="col-md-12">
+                            <h6 style="margin-bottom: 10px; font-weight: bold;">Availability Tags:</h6>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('enable_variation', 'on', (($getAttribute['enable_variation']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Enable Variation
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('express_delivery', 'on', (($getAttribute['express_delivery']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Express Delivery
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('new_arrival', 'on', (($getAttribute['new_arrival']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                New Arrival
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('enable_comment', 'on', (($getAttribute['enable_comment']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Enable Comment
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('enable_review', 'on', (($getAttribute['enable_review']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Enable Review
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('best_selling', 'on', (($getAttribute['best_selling']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Best Selling
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('recommended', 'on', (($getAttribute['recommended']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Recommended
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('multiple_pricing', 'on', (($getAttribute['multiple_pricing']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                Multiple Pricing
+                            </label>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <label style="font-weight: normal;">
+                                {{ Form::checkbox('emi_available', 'on', (($getAttribute['emi_available']??'') == 'on'), ['class' => 'checkbox-inline']) }}
+                                EMI Available
+                            </label>
+                        </div>
+                    <div class="row" style="margin-top: 6px;">
                         <div class="col-md-2 col-sm-4 col-xs-6">
                             {{ Form::text('price_min', $getAttribute['price_min']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Min']) }}
                         </div>
