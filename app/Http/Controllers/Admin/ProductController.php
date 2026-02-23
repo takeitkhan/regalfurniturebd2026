@@ -184,7 +184,7 @@ class ProductController extends Controller
             $request->category_id,
             $request->price_min,
             $request->price_max,
-            $request->status,
+            $request->is_active,
             $formDate,
             $toDate,
         ])->filter(function ($value) {
@@ -208,7 +208,7 @@ class ProductController extends Controller
             'price_max'     => $request->price_max,
             'formDate'      => $formDate,
             'toDate'        => $toDate,
-            'status'        => $request->status,
+            'is_active'     => $request->is_active,
         ];
 
         $products = $this->product->getAllByRole($filters);

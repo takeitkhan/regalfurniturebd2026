@@ -35,10 +35,10 @@
                             {{ Form::text('sku', $getAttribute['sku']??'', ['class' => 'form-control input-sm', 'placeholder' => 'SKU']) }}
                         </div>
                         <div class="col-md-2 col-sm-4 col-xs-6">
-                            <select name="status" class="form-control input-sm">
+                            <select name="is_active" class="form-control input-sm">
                                 <option value="">Product Status</option>
-                                <option value="1" {{ ($getAttribute['status']??'') == '1' ? 'selected' : '' }}>Active</option>
-                                <option value="0" {{ ($getAttribute['status']??'') == '0' ? 'selected' : '' }}>Inactive</option>
+                                <option value="1" {{ ($getAttribute['is_active']??'') == '1' ? 'selected' : '' }}>Active</option>
+                                <option value="0" {{ ($getAttribute['is_active']??'') == '0' ? 'selected' : '' }}>Inactive</option>
                             </select>
                         </div>
                     </div>

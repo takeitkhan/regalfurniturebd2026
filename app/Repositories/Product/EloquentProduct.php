@@ -593,7 +593,7 @@ class EloquentProduct implements ProductInterface
             'price_max' => null,
             'formDate' => null,
             'toDate' => null,
-            'status' => null,
+            'is_active' => null,
         );
 
         $new = array_merge($default, $options);
@@ -616,7 +616,7 @@ class EloquentProduct implements ProductInterface
             $new['price_max'],
             $new['formDate'],
             $new['toDate'],
-            $new['status'],
+            $new['is_active'],
             $new['column'],
         ])->filter(function ($value) {
             return $value !== null && $value !== '';
@@ -690,8 +690,8 @@ class EloquentProduct implements ProductInterface
             }
 
             // Status filter
-            if (!empty($new['status'])) {
-                $data = $data->where('products.status', $new['status']);
+            if ($new['is_active'] !== null && $new['is_active'] !== '') {
+                $data = $data->where('products.is_active', $new['is_active']);
             }
 
             $data = $data->distinct()->orderBy('products.id', 'desc')->groupBy('products.id')->paginate(10);
