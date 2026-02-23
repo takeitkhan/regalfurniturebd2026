@@ -799,9 +799,19 @@ public function orders(Request $request)
 
         $order = $this->ordersmaster->getById($request->get('order_id'));
         $old_status = $order->payment_term_status ?? null;
+        $new_payment_status = $request->get('payment_term_status');
+
+        // Validate Payment Status based on Order Status
+        if ($order->order_status === 'payment-failed') {
+            // When order status is payment-failed, payment status can only be Pending or Failed
+            if (!in_array($new_payment_status, ['Pending', 'Failed'])) {
+                return redirect('orders_single/' . $order->order_random . '?info_type=status')
+                    ->with('error', 'When Order Status is "Payment Failed", Payment Status can only be "Pending" or "Failed"');
+            }
+        }
 
         $attributes = [
-            'payment_term_status' => $request->get('payment_term_status')
+            'payment_term_status' => $new_payment_status
         ];
 
         $this->ordersmaster->update($order->id, $attributes);

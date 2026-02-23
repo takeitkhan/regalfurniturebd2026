@@ -80,6 +80,8 @@
                         <option value="mobilebanking" {{ ($order_master->payment_method ?? null) == 'mobilebanking' ? 'selected' : '' }} disabled>Mobile Banking Payment</option>
                         <option value="nagad" {{ ($order_master->payment_method ?? null) == 'nagad' ? 'selected' : '' }} disabled>Nagad Payment</option>
                         <option value="bkash" {{ ($order_master->payment_method ?? null) == 'bkash' ? 'selected' : '' }} disabled>bKash Payment</option>
+                        <option value="bank_transfer" {{ ($order_master->payment_method ?? null) == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                        <option value="deposit_in_party_code" {{ ($order_master->payment_method ?? null) == 'deposit_in_party_code' ? 'selected' : '' }}>Deposit in Party Code</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Update Payment Method</button>

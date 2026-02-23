@@ -55,6 +55,8 @@
                                 <option value="mobilebanking" {{ ($getAttribute['payment_method']??'') == 'mobilebanking' ? 'selected' : '' }}>Mobile Banking</option>
                                 <option value="nagad" {{ ($getAttribute['payment_method']??'') == 'nagad' ? 'selected' : '' }}>Nagad</option>
                                 <option value="bkash" {{ ($getAttribute['payment_method']??'') == 'bkash' ? 'selected' : '' }}>bKash</option>
+                                <option value="bank_transfer" {{ ($getAttribute['payment_method']??'') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                <option value="deposit_in_party_code" {{ ($getAttribute['payment_method']??'') == 'deposit_in_party_code' ? 'selected' : '' }}>Deposit in Party Code</option>
                             </select>
                         </div>
                         <div class="col-md-2 col-sm-4 col-xs-6">
@@ -237,7 +239,20 @@
                                     {{ $line->payment_term_status ?? '-' }}
                                 </td>
                                 <td>
-                                    {{ $line->payment_method ?? '-' }}
+                                    @php
+                                        $paymentMethodLabels = [
+                                            'cash_on_delivery' => 'Cash On Delivery',
+                                            'paid_on_hand' => 'Cash on Hand',
+                                            'debitcredit' => 'Debit/Credit',
+                                            'mobilebanking' => 'Mobile Banking',
+                                            'nagad' => 'Nagad',
+                                            'bkash' => 'bKash',
+                                            'bank_transfer' => 'Bank Transfer',
+                                            'deposit_in_party_code' => 'Deposit in Party Code'
+                                        ];
+                                        $paymentMethodText = $paymentMethodLabels[$line->payment_method] ?? ($line->payment_method ?? '-');
+                                    @endphp
+                                    {{ $paymentMethodText }}
                                 </td>
                                 <td>
                                     <b>Order Date: </b>{{ $line->order_date ?? null }} <br>
