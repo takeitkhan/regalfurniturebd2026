@@ -1019,7 +1019,7 @@ class CartController extends Controller
 //        return $pm['total_amount'];
         $charge_for_amount = 0;
         $deliverycharge = 0;
-        $total_amount = $pm['total_amount'];
+        $total_amount = $pm ? ($pm["total_amount"] ?? 0) : 0;
 
         $district = strtolower($request->district);
 

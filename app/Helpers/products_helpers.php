@@ -1194,7 +1194,7 @@ if (!function_exists('order_master_create')) {
         if ($data['payment_method']->payment_method == 'cash_on_delivery') {
             $order_status = 'placed';
         } else {
-            $order_status = null;
+            $order_status = 'pending';
         }
         if (!empty($data['user_details']) && $data['cart']) {
             return $orders_master_attributes = [

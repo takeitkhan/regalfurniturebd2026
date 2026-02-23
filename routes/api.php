@@ -151,9 +151,9 @@ Route::group(['namespace' => 'API', 'prefix' => 'product'], function () {
     Route::get('360degreeImages', [ProductController::class, 'DegreeImages']);
     Route::get('product-variation', [ProductController::class, 'getProductVariaton']);
 
-    Route::get('get-product-attribute/{product_id}', [ProductController::class, 'getProoductAttribute']);
-    Route::get('get-product-variation/{product_id}', [ProductController::class, 'getProoductVariation']);
-    Route::get('get-product-variation-another/{product_id}', [ProductController::class, 'getProoductVariationAnother']);
+    Route::get('get-product-attribute/{product_id}', [OldProductController::class, 'getProoductAttribute']);
+    Route::get('get-product-variation/{product_id}', [ProductController::class, 'getProductVariations']);
+    Route::get('get-product-variation-another/{product_id}', [OldProductController::class, 'getProoductVariationAnother']);
     Route::any('get-customer-selected-product-variation',
         [ProductController::class, 'getCustomerSelectProductVariation']);
 

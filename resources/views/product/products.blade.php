@@ -28,7 +28,7 @@
                         <div class="col-md-2 col-sm-8 col-xs-12">
                             {{ Form::text('search_term', $getAttribute['search_term']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Search by Code / Name / Title / SKU']) }}
                         </div>
-                        <div class="col-md-2 col-sm-4 col-xs-6">
+                        <div class="col-md-1 col-sm-4 col-xs-6">
                             <select name="availability_tag" class="form-control input-sm">
                                 <option value="">Availability Tags</option>
                                 <option value="enable_variation" {{ ($getAttribute['availability_tag']??'') == 'enable_variation' ? 'selected' : '' }}>Enable Variation</option>
@@ -43,7 +43,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 col-sm-4 col-xs-6">
+                        <div class="col-md-1 col-sm-4 col-xs-6">
                             <select name="is_active" class="form-control input-sm">
                                 <option value="">Product Status</option>
                                 <option value="1" {{ ($getAttribute['is_active']??'') == '1' ? 'selected' : '' }}>Active</option>
@@ -57,14 +57,14 @@
                         <div class="col-md-1 col-sm-4 col-xs-6">
                             {{ Form::text('price_max', $getAttribute['price_max']??'', ['class' => 'form-control input-sm', 'placeholder' => 'Price Max']) }}
                         </div>
-                        <div class="col-md-1 col-sm-3 col-xs-6">
+                        <div class="col-md-2 col-sm-3 col-xs-6">
                             <div class="input-group date">
                                 <div class="input-group-addon">From</div>
                                 <input value="{{ $getAttribute['formDate']??'' }}" autocomplete="off" type="text"
                                        name="formDate" id="formDate" class="form-control input-sm datepicker">
                             </div>
                         </div>
-                        <div class="col-md-1 col-sm-3 col-xs-6">
+                        <div class="col-md-2 col-sm-3 col-xs-6">
                             <div class="input-group date">
                                 <div class="input-group-addon">To</div>
                                 <input value="{{ $getAttribute['toDate']??''  }}" autocomplete="off" type="text"
