@@ -8,6 +8,35 @@ use Illuminate\Support\Facades\Request;
 
 class EloquentOrdersMaster implements OrdersMasterInterface
 {
+    public function self()
+    {
+        return OrdersMaster::query();
+    }
+
+    public function getById($id)
+    {
+        // TODO: Implement getById() method.
+    }
+
+    public function getByAny($column, $value)
+    {
+        return $this->model->where($column, $value)->first();
+    }
+
+    public function getByAnyTwoValue($col1, $value1, $col2, $value2)
+    {
+        // TODO: Implement getByAnyTwoValue() method.
+    }
+
+    public function create(array $attributes)
+    {
+        // TODO: Implement create() method.
+    }
+
+    public function update($id, array $attributes)
+    {
+        // TODO: Implement update() method.
+    }
     private $model;
 
     /**
@@ -51,70 +80,70 @@ class EloquentOrdersMaster implements OrdersMasterInterface
         $default = array(
             'column' => null,
             'search_key' => null,
-            'order_status' => null
+            // ...existing keys...
         );
 
-        $new = array_merge($default, $options);
-
-        if (!empty($new['order_status'])) {
-            $os = " order_status = '" . $new['order_status'] . "'";
-        } else {
-            $os = " order_status IS NOT NULL OR order_status IS NULL";
-        }
-
-        if (!empty($new['search_key']) && !empty($new['column'])) {
-            //dd($this->model->whereRaw('' . $new['column'] . ' like "%' . $new['search_key'] . '%"')->toSql());
-            return $this->model
-                //->where($new['column'], $new['search_key'])
-                ->whereRaw('' . $new['column'] . ' like "%' . $new['search_key'] . '%"')
-                ->orderBy('id', 'desc')
-                ->paginate(10);
-        } else {
-            return $this->model
-                ->whereRaw($os)
-                ->orderBy('id', 'desc')
-                ->paginate(10);
-        }
-
-    }
-
-    public function self(){
-        return $this->model;
-    }
-    /**
-     * @param $id
-     */
-    public function getById($id)
-    {
-        return $this->model->findOrFail($id);
-    }
-
-    public function getByAny($column, $value)
-    {
-        return $this->model->where($column, $value)->get()->first();
-    }
-
-    public function getByAnyTwoValue($col1, $val1, $col2, $val2){
-        return $this->model->where($col1, $val1,)->where($col2, $val2);
-    }
-
-    /**
-     * @param array $att
-     */
-    public function create(array $att)
-    {
-        return $this->model->create($att);
-    }
-
-    /**
-     * @param $id
-     * @param array $att
-     */
-    public function update($id, array $att)
-    {
-        $todo = $this->getById($id);
-        $todo->update($att);
-        return $todo;
+        if ($hasOrFilters) {
+            $data = $data->where(function ($query) use ($new) {
+                    if (!empty($new['search_key']) && !empty($new['column'])) {
+                        $query->orWhere($new['column'], 'like', '%' . $new['search_key'] . '%');
+                    }
+                    if (!empty($new['search_term'])) {
+                        $term = $new['search_term'];
+                        if (is_numeric($term)) {
+                            $query->orWhere('om.id', $term);
+                        }
+                        $query->orWhere('om.order_random', 'like', '%' . $term . '%')
+                              ->orWhere('om.customer_name', 'like', '%' . $term . '%')
+                              ->orWhere('om.phone', 'like', '%' . $term . '%')
+                              ->orWhere('om.email', 'like', '%' . $term . '%')
+                              ->orWhereExists(function ($sub) use ($term) {
+                                  $sub->selectRaw('1')
+                                      ->from('orders_detail as od2')
+                                      ->whereColumn('od2.order_random', 'om.order_random')
+                                      ->where(function ($q) use ($term) {
+                                          $q->where('od2.product_code', 'like', '%' . $term . '%')
+                                            ->orWhere('od2.product_name', 'like', '%' . $term . '%');
+                                      });
+                              });
+                    }
+                    if (!empty($new['order_id'])) {
+                        $query->orWhere('om.id', $new['order_id']);
+                    }
+                    if (!empty($new['order_random'])) {
+                        $query->orWhere('om.order_random', $new['order_random']);
+                    }
+                    if (!empty($new['customer_name'])) {
+                        $query->orWhere('om.customer_name', 'like', '%' . $new['customer_name'] . '%');
+                    }
+                    if (!empty($new['phone'])) {
+                        $query->orWhere('om.phone', 'like', '%' . $new['phone'] . '%');
+                    }
+                    if (!empty($new['email'])) {
+                        $query->orWhere('om.email', 'like', '%' . $new['email'] . '%');
+                    }
+                    if (!empty($new['product_code']) || !empty($new['product_name'])) {
+                        $query->orWhereExists(function ($sub) use ($new) {
+                            $sub->selectRaw('1')
+                                ->from('orders_detail as od2')
+                                ->whereColumn('od2.order_random', 'om.order_random');
+                            if (!empty($new['product_code'])) {
+                                $sub->where('od2.product_code', 'like', '%' . $new['product_code'] . '%');
+                            }
+                            if (!empty($new['product_name'])) {
+                                $sub->where('od2.product_name', 'like', '%' . $new['product_name'] . '%');
+                            }
+                        });
+                    }
+                    // order_status STRICT filter is now always outside this group
+                    if (!empty($new['payment_method'])) {
+                        $query->orWhere('om.payment_method', $new['payment_method']);
+                    }
+                    if (!empty($new['payment_term_status'])) {
+                        $query->orWhere('om.payment_term_status', $new['payment_term_status']);
+                    }
+                });
+            }
     }
 
     public function delete($id)
@@ -179,7 +208,6 @@ public function getAllByUser(array $options = [])
             || !empty($new['payment_method']) || !empty($new['payment_term_status']);
 
         if ($hasOrFilters) {
-            // 🔍 OR-based search filters
             $data = $data->where(function ($query) use ($new) {
                 if (!empty($new['search_key']) && !empty($new['column'])) {
                     $query->orWhere($new['column'], 'like', '%' . $new['search_key'] . '%');
@@ -231,9 +259,6 @@ public function getAllByUser(array $options = [])
                         }
                     });
                 }
-                if (!empty($new['order_status'])) {
-                    $query->orWhere('om.order_status', $new['order_status']);
-                }
                 if (!empty($new['payment_method'])) {
                     $query->orWhere('om.payment_method', $new['payment_method']);
                 }
@@ -241,6 +266,10 @@ public function getAllByUser(array $options = [])
                     $query->orWhere('om.payment_term_status', $new['payment_term_status']);
                 }
             });
+            // Apply order_status as a strict filter after the orWhere group
+            if (!empty($new['order_status'])) {
+                $data = $data->where('om.order_status', $new['order_status']);
+            }
         }
 
         if (!empty($new['formDate']) && !empty($new['toDate'])) {
@@ -333,7 +362,7 @@ public function getAllByUser(array $options = [])
                     });
                 }
                 if (!empty($new['order_status'])) {
-                    $query->orWhere('om.order_status', $new['order_status']);
+                    $query->where('om.order_status', $new['order_status']);
                 }
                 if (!empty($new['payment_method'])) {
                     $query->orWhere('om.payment_method', $new['payment_method']);
@@ -342,6 +371,10 @@ public function getAllByUser(array $options = [])
                     $query->orWhere('om.payment_term_status', $new['payment_term_status']);
                 }
             });
+            // Apply order_status as a strict filter after the orWhere group
+            if (!empty($new['order_status'])) {
+                $data = $data->where('om.order_status', $new['order_status']);
+            }
         }
 
         if (!empty($new['formDate']) && !empty($new['toDate'])) {

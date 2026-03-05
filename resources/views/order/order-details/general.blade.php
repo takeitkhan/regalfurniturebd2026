@@ -12,9 +12,13 @@
         </p>
         <p>
             <strong>Phone:</strong>
-            <a href="tel: {{ $order_master->phone }}">
-                {{ $order_master->phone ?? NULL }}
-            </a>
+            @if(optional($order_master)->phone)
+                <a href="tel: {{ $order_master->phone }}">
+                    {{ $order_master->phone }}
+                </a>
+            @else
+                <span class="text-danger">ফোন নম্বর নেই</span>
+            @endif
         </p>
         <p>
             <strong>Email:</strong>
@@ -24,9 +28,13 @@
         </p>
         <p>
             <strong>Emergency Phone:</strong>
-            <a href="tel: {{ $order_master->emergency_phone }}">
-                {{ $order_master->emergency_phone ?? NULL }}
-            </a>
+            @if(optional($order_master)->emergency_phone)
+                <a href="tel: {{ $order_master->emergency_phone }}">
+                    {{ $order_master->emergency_phone }}
+                </a>
+            @else
+                <span class="text-danger">নেই</span>
+            @endif
         </p>
         <br/>
         <br/>

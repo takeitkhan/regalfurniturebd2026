@@ -42,6 +42,7 @@
             $getfromOneClickBuy = $fromOneClickBuy ? Oneclickbuy::where('id', $fromOneClickBuy)->first() : null;
         @endphp
         <form action="{{route('order.custom_order_store')}}" method="post" class="customOrderForm">
+            @csrf
             <input type="hidden" name="order_source" value="{{$fromOneClickBuy ? 'one click Buy' : 'custom'}}">
             <div class="col-md-3" id="signupForm">
                 <div class="box box-success">
@@ -57,7 +58,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    {{ Form::text('emergencyPhone', $getfromOneClickBuy->customer_phone ?? null, ['required', 'class' => 'form-control', 'placeholder' => 'Emergency Phone ...','id' => 'emergencyPhone']) }}
+                                    {{ Form::text('emergencyPhone', $getfromOneClickBuy->customer_phone ?? null, ['class' => 'form-control', 'placeholder' => 'Emergency Phone ...','id' => 'emergencyPhone']) }}
                                 </div>
                             </div>
                         </div>
@@ -66,39 +67,14 @@
                         <div class="form-group">
                             {{ Form::text('email', $getfromOneClickBuy->customer_email ?? null, ['required', 'class' => 'form-control', 'placeholder' => 'Enter email...','id' => 'email']) }}
                         </div>
-                        {{--                    <div class="row">--}}
-                        {{--                        <div class="col-md-6">--}}
-                        {{--                            <div class="form-group">--}}
-                        {{--                                {!! Form::select('divsion', ['' => 'Select division'], $image->active??1,['class' => 'divisionField form-control']) !!}--}}
-                        {{--                            </div>--}}
-                        {{--                        </div>--}}
-
-                        {{--                        <div class="col-md-6">--}}
-                        {{--                            <div class="form-group">--}}
-                        {{--                                {!! Form::select('district', ['' => 'Select district'], $image->active??1,['class' => 'districtField form-control']) !!}--}}
-                        {{--                            </div>--}}
-                        {{--                        </div>--}}
-                        {{--                    </div>--}}
                         <div class="form-group">
-                            {{--                        {!! Form::select('thana', ['' => 'Select thana'], $image->active??1,['class' => 'thanaField form-control']) !!}--}}
-                            @php
-                                $divisions = ['Dhaka', 'Chittagong', 'Khulna', 'Sylhet', 'Barisal', 'Rajshahi', 'Rangpur'];
-                            @endphp
-                            <select class="form-control" id="division_select">
+                            <select class="form-control" id="division_select" name="division" required>
                                 <option value="" selected disabled>Select Division</option>
-                                @foreach($divisions as $divi)
-                                    <option value="{{$divi}}">{{$divi}}</option>
-                                @endforeach
-                                {{--                            <option value="Dhaka" data-charge="{{$insideDhakaCharge}}">Dhaka</option>--}}
-                                {{--                            <option value="Outside Dhaka" data-charge="{{$outsideDhakaCharge}}">Outside Dhaka</option>--}}
                             </select>
                         </div>
                         <div class="form-group">
-                            {{--                        {!! Form::select('thana', ['' => 'Select thana'], $image->active??1,['class' => 'thanaField form-control']) !!}--}}
-                            <select name="district" class="form-control" id="district_select">
+                            <select name="district" class="form-control" id="district_select" required>
                                 <option value="" selected disabled>Select District</option>
-                                {{--                            <option value="Dhaka" data-charge="{{$insideDhakaCharge}}">Dhaka</option>--}}
-                                {{--                            <option value="Outside Dhaka" data-charge="{{$outsideDhakaCharge}}">Outside Dhaka</option>--}}
                             </select>
                         </div>
 
@@ -107,26 +83,62 @@
                         </div>
 
                         <div class="form-group">
-                            {{ Form::text('notes', '', ['required', 'class' => 'form-control', 'placeholder' => 'Enter notes...','id' => 'notes']) }}
+                            {{ Form::text('notes', '', ['class' => 'form-control', 'placeholder' => 'Enter notes...','id' => 'notes']) }}
                         </div>
 
                         <div class="form-group">
-                            {!! Form::select('paymentmethod', ['cash_on_delivery' => 'Cash on delivery', 'debitcredit' => 'Debit/Credit Card','mobilebanking' => 'Mobile Banking'], $image->active??1,['class' => 'form-control','onChange' => 'savePaymentMethod()','id' => 'paymentmethod']) !!}
+                            <select name="paymentmethod" class="form-control" id="paymentmethod" required>
+                                <option value="">Payment Method</option>
+                                <option value="cash_on_delivery">Cash On Delivery</option>
+                                <option value="paid_on_hand">Cash on Hand</option>
+                                <option value="debitcredit">Debit/Credit</option>
+                                <option value="mobilebanking">Mobile Banking</option>
+                                <option value="nagad">Nagad</option>
+                                <option value="bkash">bKash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="deposit_in_party_code">Deposit in Party Code</option>
+                            </select>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-
                                 {{Form::label('payment_term_status','Payment Status',array('class' => 'Payment Status'))}}
                                 <div class="form-group">
-                                    {!! Form::select('payment_term_status', ['COD' => 'COD', 'Pending' => 'Pending', 'Success' => 'Success','Canceled' => 'Cancelled'], $image->active??1,['class' => 'form-control']) !!}
+                                    <select name="payment_term_status" class="form-control" id="payment_term_status" required>
+                                        <option value="">Payment Status</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Successful">Successful</option>
+                                        <option value="Success">Success</option>
+                                        <option value="Failed">Failed</option>
+                                        <option value="Partial">Partial</option>
+                                        <option value="COD">COD</option>
+                                    </select>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-
                                 {{Form::label('order_status','Order Status',array('class' => 'order-status'))}}
                                 <div class="form-group">
-                                    {!! Form::select('order_status', ['placed' => 'Placed', 'recieved' => 'Recieved','processing' => 'Processing','picked' => 'Picked', 'shipped' => 'Shipped', 'delivered' => 'Delivered', 'canceled' => 'Cancelled'], $image->active??1,['class' => 'form-control']) !!}
+                                    <select name="order_status" class="form-control" id="order_status" required>
+                                        <option value="">Order Status</option>
+                                        <option value="placed">Placed</option>
+                                        <option value="production">Requested Order</option>
+                                        <option value="distribution">Distribution</option>
+                                        <option value="processing">Shipped</option>
+                                        <option value="refund">Refunded</option>
+                                        <option value="done">Complete</option>
+                                        <option value="cancel">Cancelled</option>
+                                        <option value="confirmed">Need to Shipped</option>
+                                        <option value="Customer-Unreachable">Customer Unreachable</option>
+                                        <option value="order-hold">Order Hold</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="fake-order">Fake Order</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="payment-failed">Payment Failed</option>
+                                        <option value="need-to-refund">Need to Refund</option>
+                                        <option value="partial-paid">Partial Paid</option>
+                                        <option value="partial-refunded">Partial Refunded</option>
+                                        <option value="deleted">Deleted</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -322,215 +334,288 @@
 
 
 @push('scripts')
-    <link rel="stylesheet" href="{{asset('public/cssc/select2/dist/css/select2.min.css')}}">
+    <link rel="stylesheet" href="{{asset('public/css/from_live/select2.min.css')}}">
+    <script src="{{asset('public/js/select2.full.min.js')}}"></script>
 
 
     <script>
 		jQuery(document).ready(function ($) {
+			// Initialize Select2 for product search
 			$('#order-input-search').select2({
 				ajax: {
-					url: '{{route('custom_order_search_poduct')}}', //'https://rflbestbuy.com/api/shop/search_products',
+					url: '{{route('custom_order_search_poduct')}}',
 					delay: 350,
 					data: function (params) {
-						var query = {
+						return {
 							keyword: params.term,
 						}
-
-						return query;
 					},
 					processResults: function (data) {
-
+						if (!data.products || !data.products.data) {
+							return { results: [] };
+						}
 						const products = data.products.data.map(function (item) {
-
 							return {
 								id: item.id,
-								text: item.title + '-' + item.sub_title
+								text: item.title + ' - ' + (item.sub_title || '')
 							}
 						})
-						console.log(data)
 						return {
 							results: products,
 						};
+					},
+					error: function() {
+						console.error('Failed to load products');
 					}
-
 				},
 				minimumInputLength: 3,
 				allowClear: true,
+				placeholder: 'Search product...'
 			});
 
-
+			// Handle product selection change
 			$('#order-input-search').on('change', function () {
-				let getVal = $(this).val()
+				let productId = $(this).val();
+				if (!productId) return;
+
 				$.ajax({
-					url: "{{route('custom_order_select_poduct')}}?productId=" + getVal,
+					url: "{{route('custom_order_select_poduct')}}?productId=" + productId,
 					method: "GET",
+					dataType: "json",
 					success: function (res) {
-						console.log(res.product)
-						let product = res.product;
-						// alert(product.id)
-						$('#product-id').val(product.id);
-						$('#product-image').val(product.first_image['icon_size_directory'])
-						$('#product-code').val(product.product_code)
-						$('#product-sku').val(product.product_code)
-						$('#product-title').val(product.title)
-						$('#product-sub-title').val(product.sub_title)
-						$('#qty').val(1)
-						$('#product-price').val(product.product_price_now)
+						if (res && res.product) {
+							let product = res.product;
+							$('#product-id').val(product.id);
+							$('#product-image').val(product.first_image ? product.first_image.icon_size_directory : '');
+							$('#product-code').val(product.product_code || '');
+							$('#product-sku').val(product.product_code || '');
+							$('#product-title').val(product.title || '');
+							$('#product-sub-title').val(product.sub_title || '');
+							$('#qty').val(1);
+							$('#product-price').val(product.product_price_now || 0);
+							$('#discount').val(0);
+						}
 					},
-				})
-				// console.log(getVal)
-				// loadProduct(getVal)
-
-			})
-
-			$('#add-product-button').on('click', function () {
-				let area = '.productSelectArea'
-				var errors = 0;
-				let check = $(area + ' input')
-				check.map(function () {
-					if (!$(this).val()) {
-						errors++
+					error: function(err) {
+						console.error('Failed to load product details', err);
+						alert('Failed to load product details. Please try again.');
 					}
-				})
-				if (errors == 0) {
-					let productID = $(area + ' #product-id').val();
-					let productImage = $(area + ' #product-image').val();
-					let productName = $(area + ' #product-title').val();
-					let productCode = $(area + ' #product-code').val();
-					let qty = $(area + ' #qty').val();
-					let productPrice = $(area + ' #product-price').val();
-					let productDiscount = $(area + ' #discount').val();
+				});
+			});
 
-					let html = `<tr data-row_id="${productID}" id="productRow">
-                                    <td>
-                                        <input type="hidden" name="product[${productID}][product_id]" value="${productID}">
-                                        <input type="hidden" name="product[${productID}][product_name]" value="${productName}">
-                                        <input type="hidden" name="product[${productID}][product_code]" value="${productCode}">
-                                        <input type="hidden" name="product[${productID}][product_discount]" value="${productDiscount}">
-                                        <img src="<?php echo url('/') ?>/${productImage}" width="100"  />
-                                    </td>
-                                    <td>
-                                        <a href=""><strong></strong></a>${productName}<br/>
-                                        <strong>SKU: </strong> ${productCode}<br/>
-                                        <strong>Item Code: ${productCode}</strong><br/>
-                                        <strong>Short Details: </strong>
-                                    </td>
-                                    <td>
-                                        <input class="change-qty" type="number" name="product[${productID}][qty]" maxlength="2" min="1" value="${qty}" max="99" style="width: 4em" readonly>
-                                    </td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>৳ <input name="product[${productID}][price]" type="text" value="${productPrice}" class="change-price" data-productcode="" maxlength="2" min="1" style="width:4em" readonly></td>
-                                    <td><strong>৳<span class="this_product_total_price">${qty * productPrice}</span></strong></td>
-                                    <td><strong><span class="this_product_total_discount">${productDiscount}</span></strong>%</td>
-                                    <td>
-                                        <a href="javascript:void(0)" class="btn btn-xs btn-danger remove_row" data-product_id="${productID}">
-                                            <i class="fa fa-times"></i>
-                                        </a>
-                                    </td>
-                                </tr>`;
-					$('#cartBody').prepend(html)
-					totalPrice();
+			// Handle add product button click
+			$('#add-product-button').on('click', function () {
+				let area = '.productSelectArea';
+				let errors = 0;
 
-					$('select.order-input-search option').remove()
-					$(area + ' input').val(null)
+				// Validate required fields
+				let productId = $(area + ' #product-id').val();
+				let qty = $(area + ' #qty').val();
+				let productPrice = $(area + ' #product-price').val();
 
+				if (!productId) {
+					alert('Please select a product');
+					return;
 				}
-				// $('.order-input-search').val(null).trigger('change');
+				if (!qty || qty <= 0) {
+					alert('Please enter quantity');
+					return;
+				}
+				if (!productPrice || productPrice <= 0) {
+					alert('Please enter price');
+					return;
+				}
 
-			})
+				// Check if product already exists in cart
+				if ($('tr[data-row_id="' + productId + '"]').length > 0) {
+					alert('This product is already in cart. Please remove it first if you want to add it again.');
+					return;
+				}
 
-			$('.cart-products').on('click', 'a.remove_row', function (e) {
-				e.preventDefault()
-				let id = $(this).data('product_id');
-				$('tr[data-row_id = "' + id + '"]').remove()
+				// Get all product details
+				let productImage = $(area + ' #product-image').val();
+				let productName = $(area + ' #product-title').val();
+				let productCode = $(area + ' #product-code').val();
+				let productDiscount = $(area + ' #discount').val() || 0;
+
+				// Create HTML for new row
+				let html = `<tr data-row_id="${productId}" id="productRow">
+					<td>
+						<input type="hidden" name="product[${productId}][product_id]" value="${productId}">
+						<input type="hidden" name="product[${productId}][product_name]" value="${productName}">
+						<input type="hidden" name="product[${productId}][product_code]" value="${productCode}">
+						<input type="hidden" name="product[${productId}][product_discount]" value="${productDiscount}">
+						<img src="<?php echo url('/') ?>/${productImage}" width="100" />
+					</td>
+					<td>
+						<a href=""><strong>${productName}</strong></a><br/>
+						<strong>SKU: </strong> ${productCode}<br/>
+						<strong>Item Code: ${productCode}</strong><br/>
+					</td>
+					<td>
+						<input class="change-qty" type="number" name="product[${productId}][qty]" min="1" value="${qty}" max="999" style="width: 5em" onchange="updateRowTotal($(this))">
+					</td>
+					<td></td>
+					<td></td>
+					<td>৳ <input class="change-price" name="product[${productId}][price]" type="number" value="${productPrice}" step="0.01" min="0" style="width:6em" onchange="updateRowTotal($(this))"></td>
+					<td><strong>৳<span class="this_product_total_price">${(qty * productPrice).toFixed(2)}</span></strong></td>
+					<td><strong><span class="this_product_total_discount">${productDiscount}</span></strong>%</td>
+					<td>
+						<a href="javascript:void(0)" class="btn btn-xs btn-danger remove_row" data-product_id="${productId}">
+							<i class="fa fa-times"></i>
+						</a>
+					</td>
+				</tr>`;
+
+				// Add to cart
+				$('#cartBody').prepend(html);
 				totalPrice();
-				grandTotal();
-			})
-		})
 
-		$('select#division_select').change(function () {
-			let dvision = $(this).find(':selected').val();
-			$.ajax({
-				method: 'get',
-				url: '{{url('/')}}/api/common/districts-by-diviison/' + dvision,
-				success: function (res) {
-					let html = '<option value="" selected="" disabled="">Select District</option>';
-					res.forEach((item, index) => {
-						let DelCharge = item.district == 'Dhaka' ? '{{$insideDhakaCharge}}' : '{{$outsideDhakaCharge}}';
-						html += `<option value="${item.district}" data-charge="${DelCharge}">${item.district}</option>`
-					})
-					$('select#district_select').empty().html(html)
+				// Reset form
+				$(area + ' input[type="text"], ' + area + ' input[type="number"]').val('');
+				$(area + ' select').val('');
+				$('#order-input-search').val(null).trigger('change');
+
+				// Show success message
+				toastr.success('Product added to cart successfully');
+			});
+
+			// Handle remove product from cart
+			$('.cart-products').on('click', 'a.remove_row', function (e) {
+				e.preventDefault();
+				if (confirm('Are you sure you want to remove this product?')) {
+					let id = $(this).data('product_id');
+					$('tr[data-row_id="' + id + '"]').remove();
+					totalPrice();
 				}
-			})
-		})
+			});
 
-		$('select#district_select').change(function () {
-			let charge = $(this).find(':selected').data('charge');
-			$('#the-delivery-charge').val(charge)
-			totalPrice()
-		})
+			// Handle change in qty or price
+			$(document).on('change', 'input.change-qty, input.change-price', function() {
+				updateRowTotal($(this));
+			});
 
-		function submitProductCart() {
-			$('form.customOrderForm').submit()
+			// Load divisions on page load
+			function loadDivisions() {
+				$.ajax({
+					method: 'get',
+					url: '{{url('/')}}/api/common/districts',
+					dataType: 'json',
+					success: function (res) {
+						// API returns { districts: [...] }, not array directly
+						let districtsArray = res.districts || res;
+						
+						if (!Array.isArray(districtsArray)) {
+							console.error('Invalid divisions response:', res);
+							return;
+						}
+						
+						// Get unique divisions
+						let divisions = [...new Set(districtsArray.map(item => item.division))];
+						let html = '<option value="" selected disabled>Select Division</option>';
+						
+						divisions.forEach((division) => {
+							html += `<option value="${division}">${division}</option>`;
+						});
+						
+						$('select#division_select').html(html);
+						console.log('Divisions loaded successfully:', divisions);
+					},
+					error: function(err) {
+						console.error('Failed to load divisions:', err);
+					}
+				});
+			}
+
+			// Handle division change
+			$('select#division_select').on('change', function () {
+				let division = $(this).find(':selected').val();
+				if (!division) return;
+
+				$.ajax({
+					method: 'get',
+					url: '{{url('/')}}/api/common/districts-by-diviison/' + encodeURIComponent(division),
+					dataType: 'json',
+					success: function (res) {
+						if (!Array.isArray(res)) {
+							console.error('Invalid districts response');
+							return;
+						}
+						let html = '<option value="" selected disabled>Select District</option>';
+						res.forEach((item) => {
+							let DelCharge = item.district == 'Dhaka' ? '{{$insideDhakaCharge}}' : '{{$outsideDhakaCharge}}';
+							html += `<option value="${item.district}" data-charge="${DelCharge}">${item.district}</option>`
+						});
+						$('select#district_select').empty().html(html);
+						console.log('Districts loaded:', res.length, 'districts');
+					},
+					error: function(err) {
+						console.error('Failed to load districts', err);
+					}
+				});
+			});
+
+			// Handle district change
+			$('select#district_select').on('change', function () {
+				let charge = $(this).find(':selected').data('charge') || 0;
+				$('#the-delivery-charge').val(charge);
+				totalPrice();
+			});
+
+			// Load divisions on page initialization
+			loadDivisions();
+		});
+
+		// Update individual row total
+		function updateRowTotal($element) {
+			let row = $element.closest('tr');
+			let qty = parseFloat(row.find('input.change-qty').val()) || 0;
+			let price = parseFloat(row.find('input.change-price').val()) || 0;
+			let total = (qty * price).toFixed(2);
+			row.find('span.this_product_total_price').text(total);
+			totalPrice();
 		}
 
-		$('#cartBody').on('keyup', 'input.change-qty, input.change-price', function () {
-			let dataRowId = $(this).closest('tr').data('row_id');
-			let mkClass = `tr[data-row_id=${dataRowId}]`
-			let qty = $(mkClass + ' input.change-qty').val();
-			let price = $(mkClass + ' input.change-price').val();
-			let total = parseInt(qty * price);
-			$(mkClass + ' span.this_product_total_price').text(total);
+		// Submit form
+		function submitProductCart() {
+			if ($('#cartBody tr:not(:has(.text-center))').length === 0) {
+				alert('Please add at least one product to the order');
+				return false;
+			}
+			$('form.customOrderForm').submit();
+		}
 
-			totalPrice()
-		})
-
+		// Calculate total price with discount
 		function totalPrice() {
-			let total = 0;
+			let subtotal = 0;
 			let totalDiscount = 0;
-			$('.this_product_total_price').each(function () {
-				let row = $(this).closest('tr');
 
-				// Get quantity and unit price
-				let qty = parseFloat(row.find('input[name^="product"][name$="[qty]"]').val()) || 0;
-				let unitPrice = parseFloat(row.find('input[name^="product"][name$="[price]"]').val()) || 0;
+			$('#cartBody tr').each(function () {
+				let qty = parseFloat($(this).find('input.change-qty').val()) || 0;
+				let price = parseFloat($(this).find('input.change-price').val()) || 0;
+				let discountPercent = parseFloat($(this).find('.this_product_total_discount').text()) || 0;
 
-				// Calculate item total
-				let itemTotal = qty * unitPrice;
-
-				let discountPercent = parseFloat(row.find('.this_product_total_discount').text()) || 0;
-
-				// Calculate discount
+				let itemTotal = qty * price;
 				let discountAmount = (discountPercent / 100) * itemTotal;
 
-				// Update item total DOM (optional: live update row total display)
-				row.find('.this_product_total_price').text(itemTotal.toFixed(2));
-
-				// Accumulate totals
-				total += itemTotal;
+				subtotal += itemTotal;
 				totalDiscount += discountAmount;
-				total -= totalDiscount;
-			})
-			$('#the_total_price').val(total)
+			});
+
+			let finalTotal = subtotal - totalDiscount;
+			let deliveryCharge = parseFloat($('#the-delivery-charge').val()) || 0;
+			let grandTotal = finalTotal + deliveryCharge;
+
+			$('#the_total_price').val(subtotal.toFixed(2));
 			$('#the_total_discount').val(totalDiscount.toFixed(2));
-
-
-			let dCharge = parseInt($('#the-delivery-charge').val() ?? 0);
-			$('#the-grand-total').val(parseInt(dCharge + total))
-
-
-			// return total;
-			// console.log(total)
+			$('#the-grand-total').val(grandTotal.toFixed(2));
 		}
 
-		totalPrice();
-
-		$('#the-delivery-charge').keyup(function () {
+		// Update delivery charge on keyup
+		$('#the-delivery-charge').on('keyup change', function () {
 			let dcharge = parseInt($(this).val());
-			totalPrice()
-
-		})
+			totalPrice();
+		});
 		//
 		// function grandTotal(){
 		//     // let dCharge =  parseInt($('#the-delivery-charge').val() ?? 0);

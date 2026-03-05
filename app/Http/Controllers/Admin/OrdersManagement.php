@@ -136,75 +136,77 @@ class OrdersManagement extends Controller
         }
     }
 **/
-public function orders(Request $request)
-{
-    $preBooking = $request->preBooking === 'show' ? 1 : 0;
 
-    $formDate = null;
-    $toDate   = null;
 
-    if ($request->filled(['formDate', 'toDate'])) {
-        $formDate = Carbon::parse($request->formDate)->toDateString();
-        $toDate   = Carbon::parse($request->toDate)->toDateString();
+    public function orders(Request $request)
+    {
+        $preBooking = $request->preBooking === 'show' ? 1 : 0;
+
+        $formDate = null;
+        $toDate   = null;
+
+        if ($request->filled(['formDate', 'toDate'])) {
+            $formDate = Carbon::parse($request->formDate)->toDateString();
+            $toDate   = Carbon::parse($request->toDate)->toDateString();
+        }
+
+        $hasFilters = collect([
+            $request->column,
+            $request->search_key,
+            $request->search_term,
+            $request->order_id,
+            $request->order_random,
+            $request->customer_name,
+            $request->phone,
+            $request->email,
+            $request->product_code,
+            $request->product_name,
+            $request->order_status,
+            $request->payment_method,
+            $request->payment_term_status,
+            $request->order_from,
+            $request->amount_min,
+            $request->amount_max,
+            $formDate,
+            $toDate,
+        ])->filter(function ($value) {
+            return $value !== null && $value !== '';
+        })->isNotEmpty();
+
+        if ($request->is('search_orders') && !$hasFilters) {
+            return redirect('orders');
+        }
+
+        $filters = [
+            'column'             => $request->column,
+            'search_key'         => $request->search_key,
+            'search_term'        => $request->search_term,
+            'order_id'           => $request->order_id,
+            'order_random'       => $request->order_random,
+            'customer_name'      => $request->customer_name,
+            'phone'              => $request->phone,
+            'email'              => $request->email,
+            'product_code'       => $request->product_code,
+            'product_name'       => $request->product_name,
+            'order_status'       => $request->order_status,
+            'payment_method'     => $request->payment_method,
+            'payment_term_status'=> $request->payment_term_status,
+            'formDate'           => $formDate,
+            'toDate'             => $toDate,
+            'amount_min'         => $request->amount_min,
+            'amount_max'         => $request->amount_max,
+            'pre_booking_order'  => $preBooking,
+            'order_from'         => $request->order_from,
+        ];
+
+        $orders = $this->ordersmaster->getAllByUser($filters);
+        $orders->withPath(url()->current());
+
+        return view('order.orders', [
+            'orders' => $orders,
+            'getAttribute' => $request->all(),
+        ]);
     }
-
-    $hasFilters = collect([
-        $request->column,
-        $request->search_key,
-        $request->search_term,
-        $request->order_id,
-        $request->order_random,
-        $request->customer_name,
-        $request->phone,
-        $request->email,
-        $request->product_code,
-        $request->product_name,
-        $request->order_status,
-        $request->payment_method,
-        $request->payment_term_status,
-        $request->order_from,
-        $request->amount_min,
-        $request->amount_max,
-        $formDate,
-        $toDate,
-    ])->filter(function ($value) {
-        return $value !== null && $value !== '';
-    })->isNotEmpty();
-
-    if ($request->is('search_orders') && !$hasFilters) {
-        return redirect('orders');
-    }
-
-    $filters = [
-        'column'             => $request->column,
-        'search_key'         => $request->search_key,
-        'search_term'        => $request->search_term,
-        'order_id'           => $request->order_id,
-        'order_random'       => $request->order_random,
-        'customer_name'      => $request->customer_name,
-        'phone'              => $request->phone,
-        'email'              => $request->email,
-        'product_code'       => $request->product_code,
-        'product_name'       => $request->product_name,
-        'order_status'       => $request->order_status,
-        'payment_method'     => $request->payment_method,
-        'payment_term_status'=> $request->payment_term_status,
-        'formDate'           => $formDate,
-        'toDate'             => $toDate,
-        'amount_min'         => $request->amount_min,
-        'amount_max'         => $request->amount_max,
-        'pre_booking_order'  => $preBooking,
-        'order_from'         => $request->order_from,
-    ];
-
-    $orders = $this->ordersmaster->getAllByUser($filters);
-    $orders->withPath(url()->current());
-
-    return view('order.orders', [
-        'orders' => $orders,
-        'getAttribute' => $request->all(),
-    ]);
-}
 
 
     public function orders_single($order_random)
@@ -673,121 +675,155 @@ public function orders(Request $request)
     
     public function customOrderStore(Request $r)
     {
+        // Validate required fields
         $r->validate([
-            'customerName' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
-            'address' => 'required',
+            'customerName' => 'required|string',
+            'phone' => 'required|string',
+            'email' => 'required|email',
+            'address' => 'required|string',
+            'product' => 'required|array',
+            'total_price' => 'required|numeric',
+            'delivery_price' => 'required|numeric',
         ]);
         
+        // Generate unique identifiers
         $rand = time().uniqid('rand');
         $secret_key = time().uniqid('secret');
+        
+        // Prepare order master data
         $orderMaster = [
             'order_random' => $rand,
-            'order_from' => $r->order_source,
+            'order_from' => $r->order_source ?? 'custom',
             'secret_key' => $secret_key,
             'user_id' => auth()->user()->id,
             'customer_name' => $r->customerName,
             'phone' => $r->phone,
-            'emergency_phone' => $r->emergencyPhone,
+            'emergency_phone' => $r->emergencyPhone ?? $r->phone,
             'address' => $r->address,
-            'notes' => $r->notes,
+            'notes' => $r->notes ?? '',
             'email' => $r->email,
             'order_date' => date('Y-m-d'),
-            'payment_method' => $r->paymentmethod,
-            'payment_term_status' => $r->payment_term_status,
-            'order_status' => $r->order_status,
+            'payment_method' => $r->paymentmethod ?? 'cash_on_delivery',
+            'payment_term_status' => $r->payment_term_status ?? 'Pending',
+            'order_status' => $r->order_status ?? 'placed',
             'currency' => 'BDT',
-            'district' => $r->district,
+            'division' => $r->division ?? '',
+            'district' => $r->district ?? '',
+            'thana' => $r->thana ?? '',
             'is_active' => 1,
-            'total_amount' => $r->total_price,
-            'delivery_fee' => $r->delivery_price,
-            'grand_total' => $r->total_price + $r->delivery_price,
+            'total_amount' => (float)$r->total_price,
+            'delivery_fee' => (float)$r->delivery_price,
+            'grand_total' => (float)$r->total_price + (float)$r->delivery_price,
         ];
         
-        //Check One click Buy Order is approve
+        // Check One click Buy Order
+        $checkOneClick = false;
         if ($r->oneclickbuy_id) {
             $checkOneClick = Oneclickbuy::where('id', $r->oneclickbuy_id)->first();
-            if ($checkOneClick->order_status == 'approve') {
-                return redirect()->route('order.one_click_buy_now')->with('success', 'Already Approve this order');
+            if ($checkOneClick && $checkOneClick->order_status == 'approve') {
+                return redirect()->route('order.one_click_buy_now')->with('error', 'This one-click order has already been approved');
             }
         }
         
+        // Create the order master record
         $order_master_create = OrdersMaster::create($orderMaster);
+        
+        // Prepare and create order details
         $products = [];
-        if ($r->product) {
-            foreach ($r->product as $key => $product) {
-//                $product = $r->product[$key];
-                $product_info = Product::Where(['id' => $product['product_id']])->first();
-//                dd($product_info);
-                $item = [
-                    "productid" => $product['product_id'],
-                    "productcode" => $product['product_code'],
-                    "size_colo" => null,
-                    "purchaseprice" => $product['price'],
-                    "qty" => $product['qty'],
-                    "is_dp" => null,
-                    "flash_discount" => null,
-                    "item_code" => null,
-                    "dis_tag" => 0,
-                    "pre_price" => $product['price']
-                ];
-                
-                $products [] = [
-                    'user_id' => auth()->user()->id,
-                    'vendor_id' => $product_info->user_id,
-                    'order_random' => $order_master_create->order_random,
-                    'product_id' => $product['product_id'],
-                    'product_name' => product_title($product['product_id']),
-                    'product_code' => $product['product_code'],
-                    'qty' => $product['qty'],
-                    'order_date' => date('Y-m-d'),
-                    'img' => null,
-                    'local_selling_price' => $product['price'],
-                    'local_purchase_price' => $product['price'],
-                    'delivery_charge' => null,
-                    'discount' => $product['product_discount'],
-                    'is_dp' => '',
-                    'is_flash' => '',
-                    'flash_id' => null,
-                    'flash_discount' => '',
-//                    'item_code' => (($multi_data) ? $multi_data->item_code : null),
-//                    'color_type' => (($multi_data) ? $multi_data->type : null),
-//                    'size_color_id' => (($multi_data) ? $multi_data->id : null),
-//                    'color' => (($multi_data) ? $multi_data->color_codes : null),
-//                    'size' => (($multi_data) ? $multi_data->size : null),
-//                    'product_set_id' => $item->pset_id??null,
-//                    'product_fabric_id' => $item->fabric_id??null,
-                    'item_jeson' => json_encode($item),
-                    'secret_key' => $order_master_create->secret_key,
-                    'od_status' => $order_master_create->order_status,
-                    'is_active' => 1
-                ];
-            }
-            $orderDetails = OrdersDetail::insert($products);
-            //Oneclick Buy Order Do Approve
-            $checkOneClick = false;
-            if ($r->oneclickbuy_id) {
-                $do = Oneclickbuy::find($r->oneclickbuy_id);
-                $do->order_status = 'approve';
-                $do->save();
-                $checkOneClick = true;
+        foreach ($r->product as $product_id => $product) {
+            // Get product information
+            $product_info = Product::where('id', $product['product_id'])->first();
+            
+            if (!$product_info) {
+                continue; // Skip if product not found
             }
             
-            //End
-            $subject = 'Thank you for ordering from Regal!';
-            $address = $r->email;
-            $data = $order_master_create->id;
-            OrderMailHelper::send($data, $subject, $address, $cc_emails = false);
-        }
-//        dd($products);
-//        dd($checkOneClick);
-        if ($checkOneClick) {
-            return redirect()->route('order.one_click_buy_now')->with('success', 'Order successfully created');
-        } else {
-            return redirect('orders');
+            // Prepare item data
+            $item = [
+                "productid" => $product['product_id'],
+                "productcode" => $product['product_code'] ?? '',
+                "size_colo" => null,
+                "purchaseprice" => (float)$product['price'],
+                "qty" => (int)$product['qty'],
+                "is_dp" => null,
+                "flash_discount" => null,
+                "item_code" => null,
+                "dis_tag" => 0,
+                "pre_price" => (float)$product['price']
+            ];
+            
+            // Prepare order detail record
+            $products[] = [
+                'user_id' => auth()->user()->id,
+                'vendor_id' => $product_info->user_id,
+                'order_random' => $order_master_create->order_random,
+                'product_id' => $product['product_id'],
+                'product_name' => $product['product_name'] ?? $product_info->title,
+                'product_code' => $product['product_code'] ?? '',
+                'qty' => (int)$product['qty'],
+                'order_date' => date('Y-m-d'),
+                'img' => null,
+                'local_selling_price' => (float)$product['price'],
+                'local_purchase_price' => (float)$product['price'],
+                'delivery_charge' => null,
+                'discount' => (float)($product['product_discount'] ?? 0),
+                'is_dp' => '',
+                    'is_flash' => '',
+                'flash_id' => null,
+                'flash_discount' => '',
+                'item_jeson' => json_encode($item),
+                'secret_key' => $order_master_create->secret_key,
+                'od_status' => $order_master_create->order_status,
+                'is_active' => 1
+            ];
         }
         
+        // Insert order details
+        if (!empty($products)) {
+            OrdersDetail::insert($products);
+        }
+        
+        // Update one-click buy order status if applicable
+        if ($r->oneclickbuy_id && $checkOneClick) {
+            $oneclick = Oneclickbuy::find($r->oneclickbuy_id);
+            if ($oneclick) {
+                $oneclick->order_status = 'approve';
+                $oneclick->save();
+            }
+        }
+        
+        // Send order confirmation email
+        try {
+            $subject = 'Thank you for ordering from Regal!';
+            $address = $r->email;
+            OrderMailHelper::send($order_master_create->id, $subject, $address, false);
+        } catch (\Exception $e) {
+            // Email failure should not break order creation
+        }
+        
+        // Log the order creation
+        try {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'custom_order_created',
+                'entity_type' => 'orders_master',
+                'entity_id' => $order_master_create->id,
+                'old_values' => null,
+                'new_values' => $orderMaster,
+                'note' => 'Custom order created with ' . count($products) . ' products',
+                'ip' => $r->ip(),
+                'url' => $r->fullUrl()
+            ]);
+        } catch (\Exception $e) {
+            // Logging failure should not break order creation
+        }
+        
+        // Return appropriate response
+        if ($r->oneclickbuy_id && $checkOneClick) {
+            return redirect()->route('order.one_click_buy_now')->with('success', 'Order successfully created from one-click buy');
+        } else {
+            return redirect('orders')->with('success', 'Custom order successfully created');
+        }
     }
 
     public function payment_status_update(Request $request)

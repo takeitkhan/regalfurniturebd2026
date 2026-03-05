@@ -601,6 +601,11 @@
                                 <i class="fa fa-money"></i> <span>Payment Settings</span>
                             </a>
                         </li>
+                        <li class="{{ Request::is('docs/custom*') ? 'active' : '' }}">
+                            <a href="{{ url('docs/CUSTOM_ORDERS_INDEX.md') }}" target="_blank">
+                                <i class="fa fa-file-text"></i> <span>Custom Orders Docs</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             @endif
