@@ -15,7 +15,7 @@ class EloquentOrdersMaster implements OrdersMasterInterface
 
     public function getById($id)
     {
-        // TODO: Implement getById() method.
+        return OrdersMaster::find($id);
     }
 
     public function getByAny($column, $value)
@@ -30,7 +30,7 @@ class EloquentOrdersMaster implements OrdersMasterInterface
 
     public function create(array $attributes)
     {
-        // TODO: Implement create() method.
+        return OrdersMaster::create($attributes);
     }
 
     public function update($id, array $attributes)
